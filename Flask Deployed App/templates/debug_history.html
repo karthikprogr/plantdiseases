@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>History Debug & Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+        .section { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        .success { color: green; }
+        .error { color: red; }
+        pre { background: #eee; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 History Feature Debug Page</h1>
+    
+    <div class="section">
+        <h2>1. Check Login Status</h2>
+        <button onclick="checkLogin()">Check Who I Am</button>
+        <div id="loginResult"></div>
+    </div>
+    
+    <div class="section">
+        <h2>2. Check My Predictions</h2>
+        <button onclick="checkPredictions()">Get My Predictions</button>
+        <div id="predictionsResult"></div>
+    </div>
+    
+    <div class="section">
+        <h2>3. Upload Test Image</h2>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" name="image" accept="image/*" required>
+            <button type="submit">Upload & Predict</button>
+        </form>
+        <div id="uploadResult"></div>
+    </div>
+    
+    <div class="section">
+        <h2>4. View History Page</h2>
+        <button onclick="window.location.href='/history'">Go to History</button>
+    </div>
+    
+    <script>
+        function checkLogin() {
+            fetch('/debug-info')
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('loginResult').innerHTML = `
+                        <pre class="success">${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                })
+                .catch(err => {
+                    document.getElementById('loginResult').innerHTML = `
+                        <p class="error">Error: ${err}</p>
+                        <p>You might not be logged in. <a href="/login">Login here</a></p>
+                    `;
+                });
+        }
+        
+        function checkPredictions() {
+            fetch('/debug-info')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.total_predictions === 0) {
+                        document.getElementById('predictionsResult').innerHTML = `
+                            <p class="error">❌ You have 0 predictions saved!</p>
+                            <p>Upload an image in section 3 above to create your first prediction.</p>
+                        `;
+                    } else {
+                        document.getElementById('predictionsResult').innerHTML = `
+                            <p class="success">✅ You have ${data.total_predictions} predictions!</p>
+                            <pre>${JSON.stringify(data.recent_predictions, null, 2)}</pre>
+                            <button onclick="window.location.href='/history'">View in History Page</button>
+                        `;
+                    }
+                })
+                .catch(err => {
+                    document.getElementById('predictionsResult').innerHTML = `
+                        <p class="error">Error: ${err}</p>
+                    `;
+                });
+        }
+        
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            document.getElementById('uploadResult').innerHTML = '<p>⏳ Uploading...</p>';
+            
+            try {
+                const response = await fetch('/submit', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    document.getElementById('uploadResult').innerHTML = `
+                        <p class="success">✅ Image uploaded and processed!</p>
+                        <p>Now click "Get My Predictions" in section 2 to see if it was saved.</p>
+                    `;
+                } else {
+                    document.getElementById('uploadResult').innerHTML = `
+                        <p class="error">❌ Upload failed: ${response.statusText}</p>
+                    `;
+                }
+            } catch (err) {
+                document.getElementById('uploadResult').innerHTML = `
+                    <p class="error">❌ Error: ${err}</p>
+                `;
+            }
+        });
+        
+        // Auto-check on load
+        window.onload = () => {
+            checkLogin();
+        };
+    </script>
+</body>
+</html>

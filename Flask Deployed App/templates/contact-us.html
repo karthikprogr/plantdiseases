@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% block pagetitle %}
+Contact Us
+{% endblock pagetitle %}
+
+{% block body %}
+<style>
+  body {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    font-family: "Poppins", sans-serif;
+  }
+
+  .contact-header {
+    text-align: center;
+    padding-top: 3%;
+    color: #064e3b;
+  }
+
+  .contact-header h1 {
+    font-weight: 700;
+    font-size: 2.8rem;
+  }
+
+  .contact-header p {
+    color: #065f46;
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+
+  .contact-card {
+    background: #ffffff;
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease-in-out;
+    padding: 2rem;
+    height: 100%;
+  }
+
+  .contact-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.15);
+  }
+
+  .contact-card h3 {
+    color: #14532d;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .contact-card p {
+    color: #374151;
+    font-size: 0.98rem;
+    margin-bottom: 20px;
+  }
+
+  .contact-card h5 {
+    color: #065f46;
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+
+  .social-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #111827;
+    background: #f9fafb;
+    border-radius: 10px;
+    padding: 10px 15px;
+    margin-bottom: 12px;
+    transition: all 0.3s ease;
+  }
+
+  .social-link:hover {
+    background: #d1fae5;
+    color: #064e3b;
+    transform: scale(1.02);
+  }
+
+  .social-link img {
+    height: 36px;
+    width: 36px;
+  }
+
+  .social-link span {
+    margin-left: 12px;
+    font-weight: 500;
+  }
+
+  @media (max-width: 768px) {
+    .contact-card {
+      margin-bottom: 20px;
+    }
+  }
+</style>
+
+<div class="container mt-5 mb-5">
+  <div class="contact-header">
+    <h1>📞 Contact Us 📞</h1>
+    <p>Have queries or suggestions? We’re here to help you!</p>
+  </div>
+
+  <div class="row mt-5 g-4 justify-content-center">
+    <!-- Karthik -->
+    <div class="col-12 col-md-6 col-lg-5 d-flex align-items-stretch">
+      <div class="contact-card w-100 text-center">
+        <h3>S. Karthik</h3>
+        <p>
+          Hi, I’m Karthik — currently pursuing my Bachelors in Information Technology.  
+          Passionate about <b>Machine Learning, Deep Learning, and Artificial Intelligence</b>.  
+          Also exploring <b>App Development</b> and innovative tech solutions.
+        </p>
+
+        <h5>🌐 Connect with me</h5>
+        <a href="https://mail.google.com/mail/?view=cm&fs=1&to=seelamkarthik2006@gmail.com"
+           target="_blank" class="social-link">
+          <img src="{{ url_for('static', filename='icons/gmail.png') }}" alt="Gmail">
+          <span>seelamkarthik2006@gmail.com</span>
+        </a>
+
+        <a href="https://manthan-bhikadiya.medium.com" target="_blank" class="social-link">
+          <img src="{{ url_for('static', filename='icons/k.png') }}" alt="Medium">
+          <span>karthik</span>
+        </a>
+
+        <a href="https://github.com/karthikprogr" target="_blank" class="social-link">
+          <img src="{{ url_for('static', filename='icons/github.png') }}" alt="GitHub">
+          <span>github.com/karthikprogr</span>
+        </a>
+
+        <a href="https://www.linkedin.com/in/seelam-karthik-62265831b/"
+           target="_blank" class="social-link">
+          <img src="{{ url_for('static', filename='icons/linkedin.png') }}" alt="LinkedIn">
+          <span>linkedin.com/in/seelam-karthik</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Vignesh -->
+    <div class="col-12 col-md-6 col-lg-5 d-flex align-items-stretch">
+      <div class="contact-card w-100 text-center">
+        <h3>Shabad Vignesh</h3>
+        <p>
+          Hi, I’m Vignesh — an <b>entrepreneur</b> driven by innovation and technology.  
+          I love building impactful projects that bridge creativity and AI.
+        </p>
+
+        <h5>🌐 Connect with me</h5>
+        <a href="https://mail.google.com/mail/?view=cm&fs=1&to=shabadvignesh2004@gmail.com"
+           target="_blank" class="social-link">
+          <img src="{{ url_for('static', filename='icons/gmail.png') }}" alt="Gmail">
+          <span>shabadvignesh2004@gmail.com</span>
+        </a>
+
+        <a href="https://github.com/Vignesh-kanna" target="_blank" class="social-link">
+          <img src="{{ url_for('static', filename='icons/github.png') }}" alt="GitHub">
+          <span>github.com/Vignesh-kanna</span>
+        </a>
+
+        <a href="https://www.linkedin.com/in/shabad-vignesh-4355662a1/"
+           target="_blank" class="social-link">
+          <img src="{{ url_for('static', filename='icons/linkedin.png') }}" alt="LinkedIn">
+          <span>linkedin.com/in/shabad-vignesh</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock body %}

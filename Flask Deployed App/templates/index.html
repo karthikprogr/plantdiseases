@@ -1,0 +1,795 @@
+{% extends 'base.html' %}
+
+{% block pagetitle %}
+AI Engine
+{% endblock pagetitle %}
+
+{% block body %}
+<style>
+    body {
+        background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-mid) 50%, var(--bg-gradient-end) 100%);
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .title-text {
+        font-weight: 700;
+        font-size: 2.8rem;
+        letter-spacing: 1px;
+        background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        filter: drop-shadow(0 2px 4px rgba(129, 199, 132, 0.3));
+    }
+
+    .lead {
+        color: var(--text-dark);
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+    }
+
+    .card-custom {
+        background: linear-gradient(
+            135deg,
+            rgba(168, 230, 207, 0.25) 0%,
+            rgba(220, 237, 200, 0.2) 50%,
+            rgba(232, 245, 233, 0.15) 100%
+        );
+        backdrop-filter: blur(30px);
+        -webkit-backdrop-filter: blur(30px);
+        border: 2px solid rgba(80, 200, 120, 0.3);
+        border-radius: 20px;
+        box-shadow: 
+            0 8px 32px rgba(129, 199, 132, 0.2),
+            inset 0 1px 1px rgba(255, 255, 255, 0.6),
+            inset 0 -1px 1px rgba(129, 199, 132, 0.1);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .card-custom::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(80, 200, 120, 0.15), transparent);
+        transition: left 0.6s;
+    }
+
+    .card-custom:hover::before {
+        left: 100%;
+    }
+
+    .card-custom:hover {
+        transform: translateY(-5px) scale(1.01);
+        background: linear-gradient(
+            135deg,
+            rgba(168, 230, 207, 0.3) 0%,
+            rgba(220, 237, 200, 0.25) 50%,
+            rgba(232, 245, 233, 0.2) 100%
+        );
+        box-shadow: 
+            0 12px 40px rgba(129, 199, 132, 0.3),
+            inset 0 1px 1px rgba(255, 255, 255, 0.7);
+        border-color: rgba(80, 200, 120, 0.5);
+    }
+
+    .card-custom h5 {
+        color: var(--text-dark);
+        font-weight: 700;
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+    }
+
+    .card-custom p, .card-custom ol {
+        color: var(--text-dark);
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+    }
+
+    /* New Upload Area Styles */
+    .upload-area {
+        border: 2px dashed rgba(80, 200, 120, 0.4);
+        border-radius: 15px;
+        padding: 2rem;
+        background: rgba(168, 230, 207, 0.1);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .upload-area.drag-over {
+        background: rgba(168, 230, 207, 0.2);
+        border-color: var(--primary-green);
+        box-shadow: 0 4px 20px rgba(80, 200, 120, 0.3);
+    }
+
+    .upload-area .upload-icon {
+        font-size: 3rem;
+        color: var(--primary-green);
+        filter: drop-shadow(0 2px 4px rgba(129, 199, 132, 0.3));
+    }
+
+    .upload-area p {
+        margin-bottom: 1rem;
+        color: var(--text-dark);
+        font-weight: 500;
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+    }
+
+    .upload-area .btn-group {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .upload-area .btn-upload {
+        background: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        color: var(--text-dark);
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        border-radius: 25px;
+        padding: 10px 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(129, 199, 132, 0.2);
+    }
+
+    .upload-area .btn-upload:hover {
+        background: rgba(80, 200, 120, 0.3);
+        border-color: var(--primary-green);
+        transform: scale(1.05) translateY(-2px);
+        box-shadow: 0 6px 20px rgba(129, 199, 132, 0.4);
+    }
+
+    #file-chosen {
+        margin-top: 1rem;
+        color: var(--text-dark);
+        font-style: italic;
+        font-size: 0.9rem;
+        min-height: 21px;
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+    }
+
+    #camera-container {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    #camera-feed {
+        border-radius: 10px;
+        border: 2px solid var(--primary-green);
+        box-shadow: 0 4px 15px rgba(129, 199, 132, 0.3);
+    }
+
+    #capture-btn {
+        margin-top: 10px;
+        background: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        color: var(--text-dark);
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        padding: 10px 20px;
+        border-radius: 25px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(129, 199, 132, 0.2);
+    }
+
+    #capture-btn:hover {
+        background: rgba(80, 200, 120, 0.3);
+        border-color: var(--primary-green);
+        transform: scale(1.05) translateY(-2px);
+        box-shadow: 0 6px 20px rgba(129, 199, 132, 0.4);
+    }
+
+    .btn-outline-success {
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        color: var(--text-dark);
+        border-radius: 50px;
+        padding: 10px 30px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(129, 199, 132, 0.2);
+    }
+
+    .btn-outline-success:hover, .btn-outline-success:focus {
+        background: rgba(80, 200, 120, 0.3);
+        border-color: var(--primary-green);
+        color: var(--text-dark);
+        transform: scale(1.05) translateY(-2px);
+        box-shadow: 0 6px 20px rgba(129, 199, 132, 0.4);
+    }
+
+    #preview {
+        margin-top: 15px;
+        border-radius: 10px;
+        border: 2px solid rgba(80, 200, 120, 0.3);
+        max-width: 100%;
+        height: auto;
+        box-shadow: 0 4px 15px rgba(129, 199, 132, 0.2);
+    }
+
+    .loading-spinner {
+        display: none;
+        margin-top: 15px;
+    }
+
+    .loading-spinner img {
+        width: 40px;
+        height: 40px;
+    }
+
+    ol {
+        margin-top: 10px;
+        padding-left: 20px;
+    }
+
+    /* Enhanced Preview Container */
+    .preview-container {
+        position: relative;
+        margin-top: 20px;
+        display: none;
+    }
+
+    .preview-container.active {
+        display: block;
+    }
+
+    .preview-image-wrapper {
+        position: relative;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(129, 199, 132, 0.2);
+    }
+
+    .preview-image-wrapper img {
+        width: 100%;
+        max-height: 400px;
+        object-fit: contain;
+        background: rgba(168, 230, 207, 0.1);
+    }
+
+    .image-info {
+        background: linear-gradient(
+            135deg,
+            rgba(168, 230, 207, 0.2) 0%,
+            rgba(220, 237, 200, 0.15) 100%
+        );
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        padding: 12px 15px;
+        border-radius: 10px;
+        margin-top: 10px;
+        font-size: 0.9rem;
+        text-align: left;
+        border: 1px solid rgba(80, 200, 120, 0.2);
+    }
+
+    .image-info-item {
+        display: flex;
+        justify-content: space-between;
+        margin: 5px 0;
+        color: var(--text-dark);
+    }
+
+    .image-info-item strong {
+        color: var(--primary-green);
+    }
+
+    .change-image-btn {
+        background: rgba(255, 152, 0, 0.2);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        color: var(--text-dark);
+        border: 2px solid rgba(255, 152, 0, 0.4);
+        padding: 8px 20px;
+        border-radius: 25px;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: all 0.3s ease;
+        font-weight: 600;
+    }
+
+    .change-image-btn:hover {
+        transform: scale(1.05) translateY(-2px);
+        background: rgba(255, 152, 0, 0.3);
+        box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
+    }
+
+    /* Loading Overlay */
+    .loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .loading-overlay.active {
+        display: flex;
+    }
+
+    .loading-content {
+        background: linear-gradient(
+            135deg,
+            rgba(168, 230, 207, 0.95) 0%,
+            rgba(220, 237, 200, 0.95) 100%
+        );
+        backdrop-filter: blur(30px);
+        -webkit-backdrop-filter: blur(30px);
+        border: 2px solid rgba(80, 200, 120, 0.3);
+        border-radius: 20px;
+        padding: 40px;
+        text-align: center;
+        max-width: 400px;
+        box-shadow: 0 10px 40px rgba(129, 199, 132, 0.4);
+    }
+
+    .spinner {
+        border: 4px solid rgba(200, 230, 201, 0.3);
+        border-top: 4px solid var(--primary-green);
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+        font-size: 1.2rem;
+        color: #2e7d32;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .loading-subtext {
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    .progress-bar-container {
+        width: 100%;
+        height: 6px;
+        background: #e0e0e0;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 15px;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #4caf50, #81c784);
+        width: 0%;
+        transition: width 0.3s ease;
+        animation: progress 3s ease-in-out;
+    }
+
+    @keyframes progress {
+        0% { width: 0%; }
+        50% { width: 70%; }
+        100% { width: 95%; }
+    }
+
+    /* Camera Countdown */
+    .capture-countdown {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 5rem;
+        font-weight: 700;
+        color: #4caf50;
+        text-shadow: 0 0 20px rgba(76, 175, 80, 0.8);
+        animation: countdownPulse 1s ease-in-out;
+        z-index: 10;
+    }
+
+    @keyframes countdownPulse {
+        0%, 100% { transform: translate(-50%, -50%) scale(1); }
+        50% { transform: translate(-50%, -50%) scale(1.2); }
+    }
+
+    /* Enhanced Camera Tips */
+    .camera-tips-enhanced {
+        background: linear-gradient(135deg, #fff3cd, #fff9e6);
+        border-left: 4px solid #ffc107;
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 15px;
+        text-align: left;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .camera-tips-enhanced h6 {
+        color: #f57c00;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .camera-tips-enhanced ul {
+        margin: 0;
+        padding-left: 20px;
+        list-style: none;
+    }
+
+    .camera-tips-enhanced li {
+        padding: 5px 0;
+        color: #555;
+    }
+
+    .camera-tips-enhanced li:before {
+        content: "✓ ";
+        color: #4caf50;
+        font-weight: 700;
+        margin-right: 8px;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .title-text {
+            font-size: 2rem !important;
+        }
+
+        .card-custom {
+            margin-bottom: 20px;
+        }
+
+        .preview-image-wrapper img {
+            max-height: 300px;
+        }
+
+        .loading-content {
+            padding: 30px 20px;
+            max-width: 90%;
+        }
+
+        .capture-countdown {
+            font-size: 3rem;
+        }
+    }
+</style>
+
+<div class="container my-5">
+    <div class="text-center mb-5">
+        <h1 class="title-text">🍀 AI-Powered Disease Detection 🍀</h1>
+        <p class="lead" style="font-weight: 500;">Let AI Engine help you detect plant diseases effortlessly</p>
+    </div>
+
+    <div class="row g-4">
+        <!-- Left Info -->
+        <div class="col-lg-4">
+            <div class="card-custom p-4 shadow-sm h-100">
+                <h5><b>Why detect plant diseases early?</b></h5>
+                <p>Plant diseases can significantly reduce crop yields and quality. Early detection using AI helps
+                    prevent disease spread, reduce pesticide use, and protect crops efficiently. Proper identification
+                    of the disease ensures correct treatment and reduces unnecessary loss.</p>
+            </div>
+        </div>
+
+        <!-- Center Upload Area -->
+        <div class="col-lg-4">
+            <div class="card-custom p-4 text-center shadow-sm h-100">
+                <form id="aiForm" action="/submit" method="POST" enctype="multipart/form-data">
+                    <div class="upload-area" id="upload-area">
+                        <input type="file" id="actual-btn" name="image" accept="image/*" hidden />
+                        <div class="upload-icon"><i class="bi bi-cloud-arrow-up-fill"></i></div>
+                        <p>Drag & drop an image of a leaf, or click to select a file.</p>
+                        <div class="btn-group">
+                            <label for="actual-btn" class="btn btn-upload"><i class="bi bi-upload"></i> Choose File</label>
+                            <button type="button" id="camera-btn" class="btn btn-upload"><i class="bi bi-camera-fill"></i> Use Camera</button>
+                        </div>
+                        <span id="file-chosen">No file chosen</span>
+                    </div>
+
+                    <!-- Enhanced Camera Tips -->
+                    <div id="camera-tips" class="camera-tips-enhanced" style="display: none;">
+                        <h6>� Perfect Photo Checklist</h6>
+                        <ul>
+                            <li>Leaf fills 70% of frame</li>
+                            <li>Good lighting (avoid shadows)</li>
+                            <li>Focus on diseased area</li>
+                            <li>Clear, not blurry</li>
+                            <li>Plain background preferred</li>
+                        </ul>
+                    </div>
+
+                    <div id="camera-container" style="display: none; position: relative;">
+                        <video id="camera-feed" width="300" height="300" autoplay playsinline style="border-radius: 10px;"></video>
+                        <div id="countdown-overlay" style="display: none; position: relative;">
+                            <span class="capture-countdown" id="countdown-number"></span>
+                        </div>
+                        <button type="button" id="capture-btn" class="mt-2">📸 Capture in 3s</button>
+                    </div>
+
+                    <!-- Enhanced Preview Container -->
+                    <div class="preview-container" id="preview-container">
+                        <div class="preview-image-wrapper">
+                            <img id="preview" src="#" alt="Image Preview">
+                        </div>
+                        <div class="image-info" id="image-info">
+                            <div class="image-info-item">
+                                <span><strong>📁 File:</strong></span>
+                                <span id="file-name">-</span>
+                            </div>
+                            <div class="image-info-item">
+                                <span><strong>📏 Size:</strong></span>
+                                <span id="file-size">-</span>
+                            </div>
+                            <div class="image-info-item">
+                                <span><strong>🖼️ Dimensions:</strong></span>
+                                <span id="file-dimensions">-</span>
+                            </div>
+                        </div>
+                        <button type="button" class="change-image-btn" id="change-image-btn">
+                            🔄 Change Image
+                        </button>
+                    </div>
+
+                    <button type="submit" class="btn btn-outline-success mt-3" id="analyze-btn">🔍 Analyze Image</button>
+                
+                </form>
+            </div>
+        </div>
+
+        <!-- Right Info -->
+        <div class="col-lg-4">
+            <div class="card-custom p-4 shadow-sm h-100">
+                <h5><b>Prevent Plant Diseases — Follow These Steps:</b></h5>
+                <ol>
+                    <li>Follow Good Sanitation Practices.</li>
+                    <li>Use Balanced Fertilization.</li>
+                    <li>Inspect Plants Before Bringing Them Home.</li>
+                    <li>Plant in Warm, Well-Drained Soil.</li>
+                    <li>Rotate Crops Regularly.</li>
+                    <li>Ensure Good Air Circulation.</li>
+                    <li>Remove Diseased Stems and Leaves.</li>
+                </ol>
+                <a target="_blank"
+                    href="https://www.thespruce.com/prevent-plant-diseases-in-your-garden-2539511">
+                    <button type="button" class="btn btn-outline-success mt-3">🌿 Learn More</button>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loading-overlay">
+    <div class="loading-content">
+        <div class="spinner"></div>
+        <div class="loading-text">🔬 Analyzing Your Plant...</div>
+        <div class="loading-subtext">This usually takes 2-5 seconds</div>
+        <div class="progress-bar-container">
+            <div class="progress-bar"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const actualBtn = document.getElementById('actual-btn');
+    const fileChosen = document.getElementById('file-chosen');
+    const preview = document.getElementById('preview');
+    const previewContainer = document.getElementById('preview-container');
+    const imageInfo = document.getElementById('image-info');
+    const form = document.getElementById('aiForm');
+    const uploadArea = document.getElementById('upload-area');
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const cameraContainer = document.getElementById('camera-container');
+    const cameraFeed = document.getElementById('camera-feed');
+    const cameraTips = document.getElementById('camera-tips');
+    const changeImageBtn = document.getElementById('change-image-btn');
+    const captureBtn = document.getElementById('capture-btn');
+    const countdownOverlay = document.getElementById('countdown-overlay');
+    const countdownNumber = document.getElementById('countdown-number');
+    
+    let currentFile = null;
+    let countdownInterval = null;
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+    }
+
+    function showPreview(file) {
+        currentFile = file;
+        fileChosen.textContent = file.name;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            previewContainer.classList.add('active');
+            
+            // Get image dimensions
+            const img = new Image();
+            img.onload = function() {
+                document.getElementById('file-name').textContent = file.name;
+                document.getElementById('file-size').textContent = formatFileSize(file.size);
+                document.getElementById('file-dimensions').textContent = `${this.width} x ${this.height}px`;
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+        
+        uploadArea.style.display = 'none';
+        cameraContainer.style.display = 'none';
+        if (cameraTips) cameraTips.style.display = 'none';
+        if (cameraFeed.srcObject) {
+            cameraFeed.srcObject.getTracks().forEach(track => track.stop());
+        }
+    }
+
+    // Change Image Button
+    changeImageBtn.addEventListener('click', function() {
+        previewContainer.classList.remove('active');
+        uploadArea.style.display = 'block';
+        fileChosen.textContent = 'No file chosen';
+        actualBtn.value = '';
+        currentFile = null;
+    });
+
+    actualBtn.addEventListener('change', function () {
+        if (this.files && this.files[0]) {
+            showPreview(this.files[0]);
+        }
+    });
+
+    document.getElementById('camera-btn').addEventListener('click', async function () {
+        previewContainer.classList.remove('active');
+        uploadArea.style.display = 'none';
+        cameraContainer.style.display = 'block';
+        if (cameraTips) cameraTips.style.display = 'block';
+        fileChosen.textContent = 'Camera ready - follow tips for best results';
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    width: { ideal: 1280 },
+                    height: { ideal: 1280 },
+                    facingMode: 'environment',
+                    aspectRatio: 1
+                } 
+            });
+            cameraFeed.srcObject = stream;
+        } catch (err) {
+            alert('Camera access denied or not available!');
+            console.error('Camera error:', err);
+            cameraContainer.style.display = 'none';
+            uploadArea.style.display = 'block';
+            if (cameraTips) cameraTips.style.display = 'none';
+        }
+    });
+
+    // Capture with 3-second countdown
+    captureBtn.addEventListener('click', function () {
+        let count = 3;
+        countdownOverlay.style.display = 'block';
+        captureBtn.disabled = true;
+        
+        countdownInterval = setInterval(() => {
+            countdownNumber.textContent = count;
+            countdownNumber.classList.add('capture-countdown');
+            
+            if (count === 0) {
+                clearInterval(countdownInterval);
+                countdownOverlay.style.display = 'none';
+                captureBtn.disabled = false;
+                captureImage();
+            }
+            count--;
+        }, 1000);
+    });
+
+    function captureImage() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Use fixed high-resolution canvas for better quality
+        const targetSize = 1024;  // Higher resolution for better detail capture
+        canvas.width = targetSize;
+        canvas.height = targetSize;
+        
+        // Calculate crop dimensions to center the leaf
+        const videoAspect = cameraFeed.videoWidth / cameraFeed.videoHeight;
+        let sx, sy, sWidth, sHeight;
+        
+        if (videoAspect > 1) {
+            // Landscape - crop sides
+            sHeight = cameraFeed.videoHeight;
+            sWidth = sHeight;
+            sx = (cameraFeed.videoWidth - sWidth) / 2;
+            sy = 0;
+        } else {
+            // Portrait - crop top/bottom
+            sWidth = cameraFeed.videoWidth;
+            sHeight = sWidth;
+            sx = 0;
+            sy = (cameraFeed.videoHeight - sHeight) / 2;
+        }
+        
+        // Draw cropped and centered image
+        ctx.drawImage(cameraFeed, sx, sy, sWidth, sHeight, 0, 0, targetSize, targetSize);
+        
+        // Use high-quality JPEG encoding (quality: 0.95)
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+
+        const blob = dataURItoBlob(dataUrl);
+        
+        // Generate unique filename with timestamp
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+        const filename = `captured_${timestamp}.jpg`;
+        
+        const file = new File([blob], filename, { type: 'image/jpeg' });
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        actualBtn.files = dataTransfer.files;
+        showPreview(file);
+        
+        fileChosen.textContent = `Captured: ${filename}`;
+    }
+
+    function dataURItoBlob(dataURI) {
+        const byteString = atob(dataURI.split(',')[1]);
+        const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        for (let i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+        }
+        return new Blob([ab], { type: mimeString });
+    }
+
+    // Drag and Drop functionality
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        }, false);
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, () => uploadArea.classList.add('drag-over'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, () => uploadArea.classList.remove('drag-over'), false);
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        actualBtn.files = e.dataTransfer.files;
+        if (actualBtn.files && actualBtn.files[0]) {
+            showPreview(actualBtn.files[0]);
+        }
+    });
+
+    // Form submission with loading overlay
+    form.addEventListener('submit', function (e) {
+        if (!currentFile && !actualBtn.files[0]) {
+            e.preventDefault();
+            alert('⚠️ Please select or capture an image first!');
+            return;
+        }
+        loadingOverlay.classList.add('active');
+    });
+</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+{% endblock body %}

@@ -1,0 +1,61 @@
+# Render.com Build & Deploy Configuration
+# This file tells Render how to build and run your Flask application
+
+services:
+  - type: web
+    name: plant-disease-api
+    env: python
+    region: oregon  # Choose: oregon, frankfurt, singapore, ohio
+    plan: free  # Free tier - 512MB RAM, sleeps after 15min inactivity
+    
+    # Repository configuration
+    # Fill these after pushing to GitHub
+    # repo: https://github.com/YOUR_USERNAME/YOUR_REPO_NAME
+    # branch: main
+    
+    # Build configuration
+    buildCommand: pip install -r requirements-production.txt
+    startCommand: gunicorn app:app --workers 2 --threads 4 --timeout 120 --bind 0.0.0.0:$PORT
+    
+    # Health check
+    healthCheckPath: /
+    
+    # Environment variables (set these in Render Dashboard)
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      
+      - key: SECRET_KEY
+        generateValue: true  # Auto-generate secure key
+      
+      - key: JWT_SECRET_KEY
+        generateValue: true  # Auto-generate secure key
+      
+      - key: PYTHON_VERSION
+        value: 3.10.12
+      
+      - key: MAX_CONTENT_LENGTH
+        value: 16777216
+      
+      - key: UPLOAD_FOLDER
+        value: static/uploads
+      
+      # Add these manually in Render Dashboard:
+      # FIREBASE_CREDENTIALS - Paste entire JSON from service account file
+      # OPENAI_API_KEY - Your OpenAI API key
+      # MAIL_SERVER - smtp.gmail.com
+      # MAIL_PORT - 587
+      # MAIL_USERNAME - Your email
+      # MAIL_PASSWORD - Your app-specific password
+      # GOOGLE_CLIENT_ID - Your Google OAuth client ID
+      # GOOGLE_CLIENT_SECRET - Your Google OAuth client secret
+      # CORS_ORIGINS - https://your-app.vercel.app (add after Vercel deployment)
+
+    # Disk for persistent file storage (optional - free tier has 1GB)
+    disk:
+      name: uploads
+      mountPath: /opt/render/project/src/static/uploads
+      sizeGB: 1
+
+# Note: After creating the service on Render.com, you can also configure via Web UI
+# This YAML is optional but helps with infrastructure-as-code

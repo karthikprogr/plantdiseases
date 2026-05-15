@@ -1,0 +1,43 @@
+/* Add to existing Home.css */
+
+.selected-plants-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.plant-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(80, 200, 120, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    border: 1px solid rgba(80, 200, 120, 0.4);
+    color: #50C878;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.plant-badge-icon {
+    font-size: 1.2rem;
+}
+
+.btn-change-plants {
+    width: 100%;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #50C878, #81C784);
+    color: #0a2e1a;
+    border: none;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-change-plants:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(80, 200, 120, 0.4);
+}

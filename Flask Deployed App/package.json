@@ -1,0 +1,30 @@
+{
+  "name": "Plant Disease Detection API",
+  "version": "2.0.0",
+  "description": "Flask backend API for plant disease detection using PyTorch CNN model with Firebase integration",
+  "main": "app.py",
+  "scripts": {
+    "start": "gunicorn app:app",
+    "dev": "flask run --host=0.0.0.0 --port=5000 --reload",
+    "test": "python -m pytest tests/",
+    "migrate": "python migrate_csv_to_firebase.py",
+    "test-firebase": "python -c 'import firebase_service; firebase_service.test_firebase_connection()'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "YOUR_GITHUB_REPO_URL"
+  },
+  "keywords": [
+    "plant-disease",
+    "machine-learning",
+    "pytorch",
+    "flask",
+    "firebase",
+    "computer-vision"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "engines": {
+    "python": "3.10.x"
+  }
+}

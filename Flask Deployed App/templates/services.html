@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Services | Plant Disease Detection{% endblock %}
+{% block body %}
+<style>
+    /* Custom animations and hover effects */
+    body {
+        background: #f5f9f5;
+    }
+
+    h1 {
+        font-weight: 700;
+        color: #1f7a32;
+    }
+
+    .card {
+        border: none;
+        border-radius: 15px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background: #ffffff;
+    }
+
+    .card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 25px rgba(31, 122, 50, 0.2);
+    }
+
+    .card-title {
+        color: #1f7a32;
+        font-weight: 600;
+    }
+
+    .btn-success {
+        background-color: #1f7a32;
+        border: none;
+    }
+
+    .btn-success:hover {
+        background-color: #2fb06f;
+    }
+
+    .btn-outline-success:hover {
+        background-color: #1f7a32;
+        color: #fff;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #007bff;
+        color: #fff;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #6c757d;
+        color: #fff;
+    }
+
+    /* Fade-in animation for the section title */
+    .fade-in-title {
+        animation: fadeInDown 1s ease-out;
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<div class="container mt-5 mb-5">
+    <h1 class="mb-5 text-center fade-in-title">🌿 Our Services</h1>
+    <div class="row justify-content-center">
+
+        <!-- Plant Disease Detection -->
+        <div class="col-md-6 col-lg-4 mb-4" data-aos="fade-up" data-aos-delay="100">
+            <div class="card h-100 shadow-sm text-center p-3">
+                <div class="card-body">
+                    <h5 class="card-title">Plant Disease Detection</h5>
+                    <p class="card-text">Upload a plant leaf image and our AI model will identify the disease and its severity. Fast, accurate, and supports many crops.</p>
+                    <a href="/index" class="btn btn-success mt-2">Try Detection</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Supplement Recommendations -->
+        <div class="col-md-6 col-lg-4 mb-4" data-aos="fade-up" data-aos-delay="200">
+            <div class="card h-100 shadow-sm text-center p-3">
+                <div class="card-body">
+                    <h5 class="card-title">Supplement Recommendations</h5>
+                    <p class="card-text">Get personalized supplement and treatment suggestions based on your diagnosis. Browse and buy from our curated marketplace.</p>
+                    <a href="/market" class="btn btn-outline-success mt-2">View Supplements</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Account -->
+        <div class="col-md-6 col-lg-4 mb-4" data-aos="fade-up" data-aos-delay="300">
+            <div class="card h-100 shadow-sm text-center p-3">
+                <div class="card-body">
+                    <h5 class="card-title">User Account</h5>
+                    <p class="card-text">Sign up or log in to save your results, access your history, and get a personalized experience.</p>
+                    <a href="/login" class="btn btn-outline-primary mt-2">Login / Signup</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expert Support -->
+        <div class="col-md-6 col-lg-4 mb-4" data-aos="fade-up" data-aos-delay="400">
+            <div class="card h-100 shadow-sm text-center p-3">
+                <div class="card-body">
+                    <h5 class="card-title">Expert Support</h5>
+                    <p class="card-text">Contact our team for expert advice on plant health, disease management, and using the platform.</p>
+                    <a href="/contact" class="btn btn-outline-secondary mt-2">Contact Us</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Crop Health Reports -->
+        <div class="col-md-6 col-lg-4 mb-4" data-aos="fade-up" data-aos-delay="500">
+            <div class="card h-100 shadow-sm text-center p-3">
+                <div class="card-body">
+                    <h5 class="card-title">Crop Health Reports</h5>
+                    <p class="card-text">Download comprehensive reports summarizing detected issues, treatment plans, and overall plant health statistics.</p>
+                    <a href="/report" class="btn btn-outline-success mt-2">View Reports</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Field Monitoring -->
+        <div class="col-md-6 col-lg-4 mb-4" data-aos="fade-up" data-aos-delay="600">
+            <div class="card h-100 shadow-sm text-center p-3">
+                <div class="card-body">
+                    <h5 class="card-title">Field Monitoring & Alerts</h5>
+                    <p class="card-text">Receive real-time alerts about disease risks and monitor your field conditions to prevent outbreaks early.</p>
+                    <a href="/monitor" class="btn btn-outline-success mt-2">Start Monitoring</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

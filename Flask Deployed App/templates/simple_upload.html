@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Upload Test</title>
+</head>
+<body>
+    <h1>🧪 Simple Upload Test</h1>
+    <p>This is the SIMPLEST possible upload form. If this doesn't work, nothing will.</p>
+    
+    <form action="/submit" method="POST" enctype="multipart/form-data">
+        <input type="file" name="image" accept="image/*" required>
+        <br><br>
+        <button type="submit">Upload Image</button>
+    </form>
+    
+    <hr>
+    <p><a href="/debug-info">Check login status</a></p>
+    <p><a href="/history">View history</a></p>
+</body>
+</html>

@@ -1,0 +1,298 @@
+{% extends 'base.html' %}
+
+{% block title %}Prediction History - AI Plant Disease Detection{% endblock %}
+
+{% block body %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+<style>
+  :root {
+    /* AuraLeaf Green Theme */
+    --primary-bg: #F9FAFC;
+    --bg-gradient-start: #A8E6CF;
+    --bg-gradient-mid: #DCEDC8;
+    --bg-gradient-end: #E8F5E9;
+    --primary-green: #50C878;
+    --secondary-green: #81C784;
+    --light-green: #C8E6C9;
+    --secondary-blue: #70A3FF;
+    --accent-coral: #FF7C6B;
+    --accent-yellow: #FFD95A;
+    --text-dark: #2C5F2D;
+    --text-light: #FFFFFF;
+    --text-muted: #7CB342;
+    --glass-bg: rgba(255, 255, 255, 0.15);
+    --glass-border: rgba(255, 255, 255, 0.4);
+  }
+</style>
+
+<div class="container-fluid" style="padding: 30px 15px; min-height: 100vh; background: transparent;">
+  
+  <!-- Page Header -->
+  <div style="text-align: center; margin-bottom: 40px;" data-aos="fade-down">
+    <h1 style="color: var(--text-dark); font-weight: 700; font-size: 2.5rem; margin-bottom: 10px;">
+      📊 Your Prediction History
+    </h1>
+    <p style="color: var(--primary-green); font-size: 1.2rem;">
+      Track all your plant disease detection results in one place
+    </p>
+  </div>
+
+  <!-- Statistics Dashboard -->
+  <div class="row" style="margin-bottom: 30px;" data-aos="fade-up">
+    <div class="col-md-3 col-sm-6" style="margin-bottom: 20px;">
+      <div class="stat-card" style="background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 2px solid rgba(255, 255, 255, 0.5); padding: 25px; border-radius: 20px; text-align: center; color: var(--text-dark); box-shadow: 0 8px 32px rgba(129, 199, 132, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.6);">
+        <div style="font-size: 2.5rem; font-weight: 700; color: var(--primary-green); filter: drop-shadow(0 2px 4px rgba(129, 199, 132, 0.2));">{{ stats.total_predictions }}</div>
+        <div style="font-size: 1rem; margin-top: 5px; opacity: 0.9; font-weight: 600;">Total Scans</div>
+      </div>
+    </div>
+    
+    <div class="col-md-3 col-sm-6" style="margin-bottom: 20px;">
+      <div class="stat-card" style="background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 2px solid rgba(255, 255, 255, 0.5); padding: 25px; border-radius: 20px; text-align: center; color: var(--text-dark); box-shadow: 0 8px 32px rgba(129, 199, 132, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.6);">
+        <div style="font-size: 2.5rem; font-weight: 700; color: var(--secondary-green); filter: drop-shadow(0 2px 4px rgba(129, 199, 132, 0.2));">{{ stats.healthy_plants }}</div>
+        <div style="font-size: 1rem; margin-top: 5px; opacity: 0.9; font-weight: 600;">Healthy Plants</div>
+      </div>
+    </div>
+    
+    <div class="col-md-3 col-sm-6" style="margin-bottom: 20px;">
+      <div class="stat-card" style="background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 2px solid rgba(255, 255, 255, 0.5); padding: 25px; border-radius: 20px; text-align: center; color: var(--text-dark); box-shadow: 0 8px 32px rgba(255, 124, 107, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.6);">
+        <div style="font-size: 2.5rem; font-weight: 700; color: var(--accent-coral); filter: drop-shadow(0 2px 4px rgba(255, 124, 107, 0.2));">{{ stats.diseased_plants }}</div>
+        <div style="font-size: 1rem; margin-top: 5px; opacity: 0.9; font-weight: 600;">Diseased Plants</div>
+      </div>
+    </div>
+    
+    <div class="col-md-3 col-sm-6" style="margin-bottom: 20px;">
+      <div class="stat-card" style="background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 2px solid rgba(255, 255, 255, 0.5); padding: 25px; border-radius: 20px; text-align: center; color: var(--text-dark); box-shadow: 0 8px 32px rgba(129, 199, 132, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.6);">
+        <div style="font-size: 2.5rem; font-weight: 700; color: var(--primary-green); filter: drop-shadow(0 2px 4px rgba(129, 199, 132, 0.2));">
+          {% if stats.total_predictions > 0 %}
+            {{ ((stats.healthy_plants / stats.total_predictions) * 100) | round(1) }}%
+          {% else %}
+            0%
+          {% endif %}
+        </div>
+        <div style="font-size: 1rem; margin-top: 5px; opacity: 0.9; font-weight: 600;">Health Rate</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section" style="background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 2px solid rgba(255, 255, 255, 0.5); padding: 20px; border-radius: 20px; margin-bottom: 30px; box-shadow: 0 8px 32px rgba(129, 199, 132, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.6);" data-aos="fade-up">
+    <h5 style="color: var(--primary-green); margin-bottom: 15px;">
+      <i class="bi bi-funnel"></i> Filter Results
+    </h5>
+    <div class="row">
+      <div class="col-md-4">
+        <input type="text" id="search-disease" placeholder="Search by disease name..." class="form-control" style="border-radius: 10px;" value="{{ request.args.get('search', '') }}">
+      </div>
+      <div class="col-md-3">
+        <select id="filter-health" class="form-select" style="border-radius: 10px;">
+          <option value="" {% if not request.args.get('health') %}selected{% endif %}>All Results</option>
+          <option value="healthy" {% if request.args.get('health') == 'healthy' %}selected{% endif %}>Healthy Only</option>
+          <option value="diseased" {% if request.args.get('health') == 'diseased' %}selected{% endif %}>Diseased Only</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select id="sort-by" class="form-select" style="border-radius: 10px;">
+          <option value="newest" {% if request.args.get('sort') == 'newest' or not request.args.get('sort') %}selected{% endif %}>Newest First</option>
+          <option value="oldest" {% if request.args.get('sort') == 'oldest' %}selected{% endif %}>Oldest First</option>
+          <option value="confidence" {% if request.args.get('sort') == 'confidence' %}selected{% endif %}>Highest Confidence</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button onclick="applyFilters()" class="btn btn-success" style="width: 100%; border-radius: 10px;">
+          <i class="bi bi-check-circle"></i> Apply
+        </button>
+      </div>
+      <div class="col-md-1">
+        <button onclick="resetFilters()" class="btn btn-outline-secondary" style="width: 100%; border-radius: 10px;" title="Reset Filters">
+          <i class="bi bi-x-circle"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- History Grid -->
+  <div class="history-grid" data-aos="fade-up">
+    {% if predictions %}
+      <div class="row">
+        {% for pred in predictions %}
+        <div class="col-lg-4 col-md-6 col-sm-12" style="margin-bottom: 25px;">
+          <div class="history-card" style="background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 2px solid rgba(255, 255, 255, 0.5); border-radius: 20px; overflow: hidden; box-shadow: 0 8px 32px rgba(129, 199, 132, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.6); transition: transform 0.3s, box-shadow 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 40px rgba(129, 199, 132, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.7)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 32px rgba(129, 199, 132, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.6)';">
+            
+            <!-- Image -->
+            <div style="position: relative; height: 200px; overflow: hidden; background: #f8f9fa;">
+              <img src="{{ url_for('static', filename=pred.image_path) }}" alt="{{ pred.disease_name }}" style="width: 100%; height: 100%; object-fit: cover;">
+              
+              <!-- Confidence Badge -->
+              <div style="position: absolute; top: 10px; right: 10px; background: {% if pred.confidence >= 0.9 %}linear-gradient(135deg, var(--primary-green), var(--secondary-blue)){% elif pred.confidence >= 0.7 %}linear-gradient(135deg, var(--accent-yellow), var(--accent-coral)){% else %}linear-gradient(135deg, #dc3545, #c82333){% endif %}; color: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+                {{ (pred.confidence * 100) | round(1) }}%
+              </div>
+            </div>
+
+            <!-- Content -->
+            <div style="padding: 20px;">
+              <h5 style="color: var(--text-dark); margin-bottom: 10px; font-weight: 600;">
+                {{ pred.disease_name.replace('___', ' - ').replace('_', ' ').title() }}
+              </h5>
+              
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; color: #666; font-size: 0.9rem;">
+                <i class="bi bi-calendar3"></i>
+                <span>{{ pred.timestamp if pred.timestamp else 'N/A' }}</span>
+              </div>
+              
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; color: #666; font-size: 0.9rem;">
+                <i class="bi bi-clock"></i>
+                <span>{{ pred.created_at if pred.created_at else 'N/A' }}</span>
+              </div>
+
+              <!-- Status Badge -->
+              <div style="margin-bottom: 15px;">
+                {% if 'healthy' in pred.disease_name.lower() %}
+                  <span style="background: linear-gradient(135deg, var(--primary-green), var(--secondary-blue)); color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+                    ✓ Healthy
+                  </span>
+                {% else %}
+                  <span style="background: linear-gradient(135deg, var(--accent-coral), var(--accent-yellow)); color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+                    ⚠ Diseased
+                  </span>
+                {% endif %}
+              </div>
+
+              <!-- Action Buttons -->
+              <div style="display: flex; gap: 10px;">
+                <a href="{{ url_for('static', filename=pred.image_path) }}" target="_blank" class="btn" style="flex: 1; border-radius: 10px; font-size: 0.9rem; background: linear-gradient(135deg, var(--secondary-blue), var(--primary-green)); color: white; border: none;">
+                  <i class="bi bi-eye"></i> View
+                </a>
+                <button onclick="deleteHistory({{ pred.id }})" class="btn" style="flex: 1; border-radius: 10px; font-size: 0.9rem; background: linear-gradient(135deg, #dc3545, #c82333); color: white; border: none;">
+                  <i class="bi bi-trash"></i> Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination -->
+      {% if pagination.pages > 1 %}
+      <div class="pagination-section" style="display: flex; justify-content: center; margin-top: 40px; gap: 10px;">
+        {% if pagination.has_prev %}
+          <a href="?page={{ pagination.prev_num }}" class="btn" style="background: linear-gradient(135deg, var(--primary-green), var(--secondary-blue)); color: white; border: none;">
+            <i class="bi bi-chevron-left"></i> Previous
+          </a>
+        {% endif %}
+        
+        <div style="display: flex; gap: 5px;">
+          {% for page_num in pagination.iter_pages() %}
+            {% if page_num %}
+              <a href="?page={{ page_num }}" class="btn {% if page_num == pagination.page %}{% endif %}" style="min-width: 45px; {% if page_num == pagination.page %}background: linear-gradient(135deg, var(--primary-green), var(--secondary-blue)); color: white; border: none;{% else %}border: 2px solid var(--primary-green); color: var(--primary-green); background: white;{% endif %}">
+                {{ page_num }}
+              </a>
+            {% else %}
+              <span style="padding: 8px;">...</span>
+            {% endif %}
+          {% endfor %}
+        </div>
+        
+        {% if pagination.has_next %}
+          <a href="?page={{ pagination.next_num }}" class="btn" style="background: linear-gradient(135deg, var(--primary-green), var(--secondary-blue)); color: white; border: none;">
+            Next <i class="bi bi-chevron-right"></i>
+          </a>
+        {% endif %}
+      </div>
+      {% endif %}
+
+    {% else %}
+      <!-- Empty State -->
+      <div style="text-align: center; padding: 80px 20px; background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 2px solid rgba(255, 255, 255, 0.5); border-radius: 20px; box-shadow: 0 8px 32px rgba(129, 199, 132, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.6);">
+        <div style="font-size: 5rem; margin-bottom: 20px;">🌱</div>
+        <h3 style="color: var(--text-dark); margin-bottom: 15px;">No Predictions Yet</h3>
+        <p style="color: #666; font-size: 1.1rem; margin-bottom: 30px;">
+          Start analyzing plant leaves to build your history!
+        </p>
+        <a href="{{ url_for('ai_engine_page') }}" class="btn btn-lg" style="border-radius: 10px; padding: 15px 40px; background: linear-gradient(135deg, var(--primary-green), var(--secondary-blue)); color: white; border: none;">
+          <i class="bi bi-camera"></i> Start Scanning
+        </a>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Back to Home Button -->
+  <div style="text-align: center; margin-top: 40px;">
+    <a href="{{ url_for('home_page') }}" class="btn btn-lg" style="border-radius: 10px; padding: 12px 40px; border: 2px solid var(--primary-green); color: var(--primary-green); background: white;">
+      <i class="bi bi-house"></i> Back to Home
+    </a>
+  </div>
+
+</div>
+
+<script>
+  // Filter and Sort Functions
+  function applyFilters() {
+    const searchTerm = document.getElementById('search-disease').value.toLowerCase();
+    const healthFilter = document.getElementById('filter-health').value;
+    const sortBy = document.getElementById('sort-by').value;
+    
+    // Build URL with query parameters
+    const params = new URLSearchParams();
+    if (searchTerm) params.append('search', searchTerm);
+    if (healthFilter) params.append('health', healthFilter);
+    if (sortBy) params.append('sort', sortBy);
+    
+    // Reload page with filters
+    const url = params.toString() ? `/history?${params.toString()}` : '/history';
+    window.location.href = url;
+  }
+  
+  // Reset filters
+  function resetFilters() {
+    window.location.href = '/history';
+  }
+  
+  // Allow Enter key to trigger search
+  document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search-disease');
+    if (searchInput) {
+      searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          applyFilters();
+        }
+      });
+    }
+  });
+
+  // Delete History Item
+  function deleteHistory(predictionId) {
+    if (confirm('Are you sure you want to delete this prediction from your history?')) {
+      fetch(`/delete-prediction/${predictionId}`, {
+        method: 'DELETE'
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('✅ Prediction deleted successfully!');
+          location.reload();
+        } else {
+          alert('❌ Error: ' + data.message);
+        }
+      })
+      .catch(error => {
+        alert('❌ Error deleting prediction: ' + error);
+      });
+    }
+  }
+</script>
+
+<!-- Add AOS Library -->
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+<script>
+  // Initialize AOS animations after library is loaded
+  AOS.init({
+    duration: 800,
+    once: true
+  });
+</script>
+
+{% endblock body %}

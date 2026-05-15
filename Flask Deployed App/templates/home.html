@@ -1,0 +1,1836 @@
+{% extends 'base.html' %}
+
+{% block pagetitle %}
+Plant Disease Detection
+{% endblock pagetitle %}
+
+{% block body %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;600&display=swap');
+
+  :root {
+    /* AuraLeaf Green Theme */
+    --primary-bg: #F9FAFC;
+    --bg-gradient-start: #A8E6CF;
+    --bg-gradient-mid: #DCEDC8;
+    --bg-gradient-end: #E8F5E9;
+    --primary-green: #50C878;
+    --secondary-green: #81C784;
+    --light-green: #C8E6C9;
+    --secondary-blue: #70A3FF;
+    --accent-coral: #FF7C6B;
+    --accent-yellow: #FFD95A;
+    --text-dark: #2C5F2D;
+    --text-light: #FFFFFF;
+    --text-muted: #7CB342;
+    --glass-bg: rgba(255, 255, 255, 0.15);
+    --glass-border: rgba(255, 255, 255, 0.4);
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: transparent;
+    color: var(--text-dark);
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  /* ---------------- HERO SECTION ---------------- */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0a2e1a 0%, #0f3d23 25%, #134d2a 50%, #1a5c35 75%, #206b3e 100%);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    padding: 6rem 4rem;
+    align-items: center;
+    color: var(--text-light);
+    overflow: hidden;
+  }
+  
+  /* Subtle plant/leaf pattern background */
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5 C 20 5, 15 15, 15 25 C 15 35, 25 40, 30 45 C 35 40, 45 35, 45 25 C 45 15, 40 5, 30 5 Z' fill='none' stroke='rgba(80, 200, 120, 0.08)' stroke-width='1'/%3E%3Cpath d='M30 25 L30 15 M25 20 L30 25 L35 20' fill='none' stroke='rgba(80, 200, 120, 0.06)' stroke-width='1'/%3E%3C/svg%3E"),
+      radial-gradient(circle, rgba(80, 200, 120, 0.05) 1px, transparent 1px);
+    background-size: 120px 120px, 60px 60px;
+    background-position: 0 0, 30px 30px;
+    animation: patternFloat 40s linear infinite;
+    opacity: 0.6;
+    z-index: 0;
+  }
+  
+  /* Animated gradient overlay for depth */
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+      radial-gradient(ellipse at 20% 20%, rgba(80, 200, 120, 0.15) 0%, transparent 40%),
+      radial-gradient(ellipse at 80% 80%, rgba(129, 199, 132, 0.12) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(200, 230, 201, 0.08) 0%, transparent 60%);
+    animation: gradientPulse 15s ease-in-out infinite;
+    z-index: 1;
+    pointer-events: none;
+  }
+  
+  @keyframes patternFloat {
+    from { background-position: 0 0, 30px 30px; }
+    to { background-position: 120px 120px, 150px 150px; }
+  }
+  
+  @keyframes gradientPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.6; }
+  }
+
+  /* Background Video Container */
+  .hero-video-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0;
+  }
+
+  .hero-video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translateX(-50%) translateY(-50%);
+    object-fit: cover;
+    z-index: 0;
+  }
+
+  /* Video Overlay for better text visibility */
+  .hero-video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, 
+      rgba(168, 230, 207, 0.7) 0%, 
+      rgba(220, 237, 200, 0.6) 50%, 
+      rgba(232, 245, 233, 0.5) 100%);
+    z-index: 1;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+
+  /* Animated gradient overlay */
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 20% 50%, rgba(129, 199, 132, 0.2) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(200, 230, 201, 0.2) 0%, transparent 50%),
+      radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+    animation: gradientShift 15s ease infinite;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  @keyframes gradientShift {
+    0%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+    50% { opacity: 0.8; transform: scale(1.1) rotate(5deg); }
+  }
+
+  /* Floating particles */
+  .hero::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      radial-gradient(2px 2px at 20% 30%, white, transparent),
+      radial-gradient(2px 2px at 60% 70%, white, transparent),
+      radial-gradient(1px 1px at 50% 50%, white, transparent),
+      radial-gradient(1px 1px at 80% 10%, white, transparent),
+      radial-gradient(2px 2px at 90% 60%, white, transparent),
+      radial-gradient(1px 1px at 33% 80%, white, transparent),
+      radial-gradient(1px 1px at 15% 90%, white, transparent);
+    background-size: 200% 200%;
+    animation: particlesFloat 20s linear infinite;
+    opacity: 0.3;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  @keyframes particlesFloat {
+    from { background-position: 0% 0%; }
+    to { background-position: 100% 100%; }
+  }
+
+  /* Left Hero Content */
+  .hero-content {
+    position: relative;
+    z-index: 10;
+    max-width: 600px;
+  }
+  
+  .hero-badge {
+    display: inline-block;
+    background: rgba(80, 200, 120, 0.2);
+    border: 1px solid rgba(80, 200, 120, 0.4);
+    padding: 0.5rem 1.2rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #50C878;
+    margin-bottom: 1.5rem;
+    animation: fadeInUp 0.6s ease-out;
+  }
+
+  .hero h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(3rem, 6vw, 4.5rem);
+    font-weight: 900;
+    margin-bottom: 1rem;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    text-align: left;
+    color: #ffffff;
+    animation: fadeInUp 0.8s ease-out 0.2s both;
+  }
+  
+  .hero h1 .gradient-text {
+    background: linear-gradient(135deg, #50C878 0%, #81C784 50%, #A8E6CF 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+  }
+
+  @keyframes neonPulse {
+    0%, 100% { 
+      filter: drop-shadow(0 0 10px rgba(80, 200, 120, 0.6)) 
+              drop-shadow(0 0 20px rgba(129, 199, 132, 0.4));
+    }
+    50% { 
+      filter: drop-shadow(0 0 20px rgba(80, 200, 120, 0.8)) 
+              drop-shadow(0 0 40px rgba(129, 199, 132, 0.6));
+    }
+  }
+
+  @keyframes titleGlow {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.2); }
+  }
+
+  @keyframes gradientText {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .hero p {
+    font-family: 'Raleway', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 400;
+    margin-bottom: 2.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.8;
+    text-align: left;
+    animation: fadeInUp 1s ease-out 0.4s both;
+  }
+  
+  .hero-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    animation: fadeInUp 1.2s ease-out 0.6s both;
+  }
+
+  .btn-ai {
+    padding: 1rem 2.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #0a2e1a;
+    background: linear-gradient(135deg, #50C878, #81C784);
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 20px rgba(80, 200, 120, 0.4);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .btn-ai:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(80, 200, 120, 0.6);
+  }
+  
+  .btn-secondary {
+    padding: 1rem 2.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-2px);
+  }
+  
+  /* Right Side - Interactive Cards */
+  .hero-interactive {
+    position: relative;
+    z-index: 10;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    padding: 2rem;
+  }
+  
+  .interactive-card {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    padding: 1.5rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: fadeIn 1s ease-out;
+  }
+  
+  .interactive-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(80, 200, 120, 0.4);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  }
+  
+  .interactive-card.large {
+    grid-column: span 2;
+  }
+  
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  .card-icon {
+    width: 32px;
+    height: 32px;
+    background: rgba(80, 200, 120, 0.2);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+  }
+  
+  .card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #50C878;
+    margin: 0;
+  }
+  
+  .card-content {
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .plant-preview {
+    width: 100%;
+    height: 180px;
+    background: linear-gradient(135deg, rgba(80, 200, 120, 0.2), rgba(129, 199, 132, 0.1));
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    margin-bottom: 1rem;
+  }
+  
+  .detection-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .stat-label {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .stat-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #50C878;
+  }
+  
+  .accuracy-indicator {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+  }
+  
+  .accuracy-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #50C878, #81C784);
+    border-radius: 10px;
+    animation: fillProgress 2s ease-out;
+  }
+  
+  @keyframes fillProgress {
+    from { width: 0%; }
+    to { width: 95%; }
+  }
+  
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.95rem;
+  }
+  
+  .check-icon {
+    width: 20px;
+    height: 20px;
+    background: #50C878;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 1024px) {
+    .hero {
+      grid-template-columns: 1fr;
+      padding: 4rem 2rem;
+      text-align: center;
+    }
+    
+    .hero h1, .hero p {
+      text-align: center;
+    }
+    
+    .hero-buttons {
+      justify-content: center;
+    }
+    
+    .hero-interactive {
+      margin-top: 3rem;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .hero {
+      padding: 3rem 1.5rem;
+    }
+    
+    .hero h1 {
+      font-size: 2.5rem;
+    }
+    
+    .hero-interactive {
+      grid-template-columns: 1fr;
+    }
+    
+    .interactive-card.large {
+      grid-column: span 1;
+    }
+  }
+  
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes buttonGlow {
+    0%, 100% { 
+      box-shadow: 
+        0 0 20px rgba(80, 200, 120, 0.3),
+        0 8px 25px rgba(129, 199, 132, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    }
+    50% { 
+      box-shadow: 
+        0 0 30px rgba(80, 200, 120, 0.5),
+        0 8px 35px rgba(129, 199, 132, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  .btn-ai::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.6s;
+  }
+
+  .btn-ai:hover::before {
+    left: 100%;
+  }
+
+  .btn-ai:hover {
+    transform: translateY(-5px) scale(1.05);
+    background: rgba(80, 200, 120, 0.2);
+    border-color: var(--primary-green);
+    box-shadow: 
+      0 0 40px rgba(80, 200, 120, 0.6),
+      0 15px 40px rgba(129, 199, 132, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    color: var(--text-dark);
+  }
+
+  .btn-ai:active {
+    transform: translateY(-2px) scale(1.02);
+  }
+
+  .btn-ai:focus {
+    outline: 3px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 4px;
+  }
+
+  /* Animated leaves background */
+  .floating-icons {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  .floating-icons img {
+    position: absolute;
+    opacity: 0.3;
+    width: clamp(70px, 10vw, 120px);
+    animation: floatIcons 30s infinite ease-in-out;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.2));
+  }
+
+  @keyframes floatIcons {
+    0%, 100% { 
+      transform: translateY(0) rotate(0deg) scale(1); 
+      opacity: 0.2;
+    }
+    25% { 
+      transform: translateY(-30px) rotate(10deg) scale(1.1); 
+      opacity: 0.3;
+    }
+    50% { 
+      transform: translateY(-60px) rotate(-5deg) scale(0.9); 
+      opacity: 0.25;
+    }
+    75% { 
+      transform: translateY(-30px) rotate(15deg) scale(1.05); 
+      opacity: 0.22;
+    }
+  }
+
+  .icon1 { 
+    top: 15%; 
+    left: 8%; 
+    animation-delay: 0s; 
+    animation-duration: 25s;
+  }
+  .icon2 { 
+    top: 65%; 
+    right: 10%; 
+    animation-delay: 7s; 
+    animation-duration: 28s;
+  }
+  .icon3 { 
+    top: 35%; 
+    left: 75%; 
+    animation-delay: 14s; 
+    animation-duration: 32s;
+  }
+  .icon4 { 
+    top: 80%; 
+    right: 25%; 
+    animation-delay: 21s; 
+    animation-duration: 26s;
+  }
+
+  @keyframes fadeInDown {
+    0% { opacity: 0; transform: translateY(-50px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeInUp {
+    0% { opacity: 0; transform: translateY(50px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---------------- CARD SECTION ---------------- */
+  .carousel-container {
+    max-width: 1300px;
+    margin: 5rem auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    justify-items: center;
+    gap: 2rem;
+    padding: 0 1rem;
+  }
+
+  /* --- Flip Card Styles --- */
+  .plant-card {
+    width: 100%;
+    max-width: 220px;
+    height: 235px; /* Fixed height for consistent flipping */
+    background-color: transparent;
+    perspective: 1000px;
+    border-radius: 20px;
+    cursor: pointer;
+  }
+
+  .plant-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    border-radius: 20px;
+  }
+
+  .plant-card:hover .plant-card-inner {
+    transform: rotateY(180deg);
+  }
+
+  .plant-card-front, .plant-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden; /* Safari */
+    backface-visibility: hidden;
+    border-radius: 20px;
+    overflow: hidden;
+  }
+
+  .plant-card-front {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 
+      0 8px 32px rgba(129, 199, 132, 0.15),
+      inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  }
+
+  .plant-card-back {
+    background: linear-gradient(135deg, rgba(129, 199, 132, 0.2), rgba(200, 230, 201, 0.2));
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 
+      0 8px 32px rgba(129, 199, 132, 0.2),
+      inset 0 1px 1px rgba(255, 255, 255, 0.6);
+    color: var(--text-dark);
+    transform: rotateY(180deg);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 1rem;
+  }
+
+  .plant-card:focus-within {
+    outline: 2px solid #4caf50;
+    outline-offset: 2px;
+  }
+
+  .plant-card img {
+    width: 100%;
+    height: 170px;
+    object-fit: cover;
+    filter: none;
+  }
+
+  .plant-info {
+    padding: 1rem;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .plant-info p {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+  }
+
+  /* ---------------- SEE MORE BUTTON ---------------- */
+  .see-more-container {
+    text-align: center;
+    margin: 3rem 0;
+  }
+
+  .see-more-btn {
+    background: linear-gradient(45deg, #388e3c, #2e7d32);
+    border: none;
+    color: #fff;
+    padding: 1rem 2rem;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(56, 142, 60, 0.4);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .see-more-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .see-more-btn:hover::before {
+    left: 100%;
+  }
+
+  .see-more-btn:hover {
+    background: linear-gradient(45deg, #43a047, #388e3c);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 6px 20px rgba(56, 142, 60, 0.5);
+  }
+
+  .see-more-btn:focus {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
+
+  .hidden-cards {
+    display: none !important;
+  }
+
+  @keyframes fadeInSlide {
+    from { 
+      opacity: 0; 
+      transform: translateY(30px); 
+    }
+    to { 
+      opacity: 1; 
+      transform: translateY(0); 
+    }
+  }
+
+  /* ---------------- MOBILE VIEW ---------------- */
+  @media only screen and (max-width: 830px) {
+    .laptop-view { display: none; }
+    .mobile-note {
+      text-align: center;
+      padding: 4rem 1rem;
+      color: #d32f2f;
+      font-size: 1.4rem;
+      font-weight: 600;
+      background: #fff;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .mobile-note::after {
+      content: '💻';
+      font-size: 3rem;
+      margin-top: 1rem;
+    }
+  }
+
+  @media (min-width: 831px) {
+    .mobile-note { display: none; }
+  }
+
+  /* Smooth scroll and focus styles */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Reduced motion for accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* =============== NEW SECTIONS STYLES =============== */
+
+  /* Statistics Section */
+  .stats-section {
+    background: transparent;
+    padding: 4rem 2rem;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .stats-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2rem;
+    padding: 0 1rem;
+  }
+
+  .stat-card {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 
+      0 8px 32px rgba(129, 199, 132, 0.15),
+      inset 0 1px 1px rgba(255, 255, 255, 0.6);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+    transition: left 0.6s;
+  }
+
+  .stat-card:hover::before {
+    left: 100%;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 
+      0 12px 40px rgba(129, 199, 132, 0.25),
+      inset 0 1px 1px rgba(255, 255, 255, 0.7);
+    border-color: var(--primary-green);
+  }
+
+  .stat-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    filter: drop-shadow(0 2px 4px rgba(129, 199, 132, 0.2));
+  }
+
+  .stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0.5rem 0;
+    filter: drop-shadow(0 1px 2px rgba(129, 199, 132, 0.3));
+  }
+
+  .stat-label {
+    font-size: 1.1rem;
+    color: var(--text-dark);
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+  }
+
+  /* How It Works Section */
+  .how-it-works {
+    max-width: 1200px;
+    margin: 5rem auto;
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+
+  .section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary-green), var(--secondary-blue));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1rem;
+  }
+
+  .section-subtitle {
+    font-size: 1.2rem;
+    color: var(--text-dark);
+    margin-bottom: 3rem;
+    opacity: 0.8;
+  }
+
+  .steps-container {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto 1fr;
+    gap: 2rem;
+    align-items: center;
+    margin-top: 3rem;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .step-card {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 20px;
+    padding: 2.5rem 2rem;
+    box-shadow: 
+      0 8px 32px rgba(129, 199, 132, 0.15),
+      inset 0 1px 1px rgba(255, 255, 255, 0.6);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+
+  .step-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 
+      0 12px 40px rgba(129, 199, 132, 0.25),
+      inset 0 1px 1px rgba(255, 255, 255, 0.7);
+    border-color: var(--primary-green);
+  }
+
+  .step-number {
+    position: absolute;
+    top: -15px;
+    right: 20px;
+    background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 15px rgba(129, 199, 132, 0.4);
+  }
+
+  .step-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+  }
+
+  .step-card h3 {
+    font-size: 1.5rem;
+    color: #2e7d32;
+    margin: 1rem 0;
+  }
+
+  .step-card p {
+    font-size: 1rem;
+    color: #555;
+    line-height: 1.6;
+  }
+
+  .step-arrow {
+    font-size: 3rem;
+    color: #4caf50;
+    font-weight: 700;
+  }
+
+  /* Supported Plants Section */
+  .supported-plants-section {
+    max-width: 1200px;
+    margin: 5rem auto;
+    padding: 3rem 2rem;
+    background: linear-gradient(135deg, #f1f8e9 0%, #ffffff 100%);
+    border-radius: 30px;
+  }
+
+  .plants-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+
+  .plant-item {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .plant-item:hover {
+    transform: translateY(-8px) rotate(2deg);
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+    background: linear-gradient(135deg, #f1f8e9, #ffffff);
+  }
+
+  .plant-emoji {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .plant-item span {
+    display: block;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2e7d32;
+  }
+
+  /* FAQ Section */
+  .faq-section {
+    max-width: 900px;
+    margin: 5rem auto;
+    padding: 3rem 2rem;
+  }
+
+  .faq-container {
+    margin-top: 3rem;
+  }
+
+  .faq-item {
+    background: white;
+    border-radius: 15px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .faq-item:hover {
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.2);
+  }
+
+  .faq-question {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem 2rem;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .faq-icon {
+    font-size: 1.8rem;
+    flex-shrink: 0;
+  }
+
+  .faq-question h3 {
+    flex: 1;
+    font-size: 1.2rem;
+    color: #2e7d32;
+    margin: 0;
+  }
+
+  .faq-toggle {
+    font-size: 2rem;
+    font-weight: 300;
+    color: #4caf50;
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+  }
+
+  .faq-item.active .faq-toggle {
+    transform: rotate(45deg);
+  }
+
+  .faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    background: #f9fdf9;
+  }
+
+  .faq-item.active .faq-answer {
+    max-height: 300px;
+    padding: 1.5rem 2rem;
+  }
+
+  .faq-answer p {
+    margin: 0;
+    color: #555;
+    line-height: 1.8;
+    font-size: 1rem;
+  }
+
+  /* Mobile Responsive Adjustments */
+  @media (max-width: 768px) {
+    .hero h1 {
+      font-size: 2rem !important;
+    }
+
+    .hero p {
+      font-size: 1rem !important;
+    }
+
+    .btn-ai {
+      padding: 0.8rem 2rem;
+      font-size: 1rem;
+    }
+
+    .section-title {
+      font-size: 2rem;
+    }
+
+    .section-subtitle {
+      font-size: 1rem;
+    }
+
+    .stats-container {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+
+    .stat-number {
+      font-size: 2rem;
+    }
+
+    .steps-container {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    .step-arrow {
+      display: none;
+    }
+
+    .step-card {
+      padding: 2rem 1.5rem;
+    }
+  }
+
+  /* Tablet: Show 2 columns for steps */
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .steps-container {
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .step-arrow {
+      display: none;
+    }
+
+    .plants-grid {
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 1rem;
+    }
+
+    .plant-emoji {
+      font-size: 2.5rem;
+    }
+
+    .plant-item span {
+      font-size: 0.9rem;
+    }
+
+    .faq-question {
+      padding: 1rem 1.5rem;
+    }
+
+    .faq-question h3 {
+      font-size: 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .stats-container {
+      grid-template-columns: 1fr;
+    }
+
+    .plants-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>
+
+<div class="mobile-note">
+  Please open this site on a Laptop/PC 💻<br>
+  Thank you 🙏
+</div>
+
+<div class="laptop-view">
+  <div class="hero" role="banner" aria-label="Plant Disease Detection Hero Section">
+    <!-- Left Side - Hero Content -->
+    <div class="hero-content">
+      <div class="hero-badge">🌿 THE #1 AI SOLUTION</div>
+      <h1>
+        PLANT DISEASE
+        <span class="gradient-text">DETECTION LAB</span>
+      </h1>
+      <p>for Keeping Plants Healthy and Productive</p>
+      <p style="font-size: 1rem; margin-bottom: 2rem;">AI-powered disease detection blends science and precision — every analysis crafted for agricultural success.</p>
+      
+      <div class="hero-buttons">
+        <a href="/index" class="btn-ai" role="button" aria-label="Launch AI Engine">
+          🚀 Launch AI Engine
+        </a>
+        <a href="#how-it-works" class="btn-secondary" role="button">
+          ⚙️ See How It Works
+        </a>
+      </div>
+    </div>
+
+    <!-- Right Side - Interactive Cards -->
+    <div class="hero-interactive">
+      <!-- How It Works Card -->
+      <div class="interactive-card large">
+        <div class="card-header">
+          <div class="card-icon">📸</div>
+          <h3 class="card-title">How Disease Detection Works</h3>
+        </div>
+        <div class="card-content">
+          <div class="plant-preview">
+            <span style="font-size: 5rem;">🍃</span>
+          </div>
+          <div class="detection-stats">
+            <div class="stat-row">
+              <span class="stat-label">Step 1:</span>
+              <span class="stat-value">Upload Leaf Photo �</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Step 2:</span>
+              <span class="stat-value">AI Analyzes Image �</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Step 3:</span>
+              <span class="stat-value">Get Instant Results 📊</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Why Trust Us Card -->
+      <div class="interactive-card">
+        <div class="card-header">
+          <div class="card-icon">⚡</div>
+          <h3 class="card-title">Why Choose Us?</h3>
+        </div>
+        <div class="card-content">
+          <div class="stat-row" style="border-bottom: none;">
+            <span class="stat-label">Results in:</span>
+            <span class="stat-value" style="color: #50C878;">< 2 Seconds ⚡</span>
+          </div>
+          <div class="accuracy-indicator">
+            <div class="accuracy-fill" style="width: 92%;"></div>
+          </div>
+          <p style="margin-top: 0.75rem; font-size: 0.85rem; color: rgba(255,255,255,0.6);">92% Accuracy • 100% Free • 24/7 Available</p>
+        </div>
+      </div>
+
+      <!-- What You Get Card -->
+      <div class="interactive-card">
+        <div class="card-header">
+          <div class="card-icon">🎁</div>
+          <h3 class="card-title">What You Get</h3>
+        </div>
+        <div class="card-content">
+          <div class="check-item">
+            <div class="check-icon">✓</div>
+            <span>Disease Name & Severity</span>
+          </div>
+          <div class="check-item">
+            <div class="check-icon">✓</div>
+            <span>Treatment Recommendations</span>
+          </div>
+          <div class="check-item">
+            <div class="check-icon">✓</div>
+            <span>Prevention Tips & Supplements</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics Dashboard -->
+  <section class="stats-section" aria-label="Platform Statistics">
+    <div class="stats-container">
+      <div class="stat-card" data-aos="fade-up">
+        <div class="stat-icon">📊</div>
+        <h3 class="stat-number">10,000+</h3>
+        <p class="stat-label">Images Analyzed</p>
+      </div>
+      <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+        <div class="stat-icon">🦠</div>
+        <h3 class="stat-number">39</h3>
+        <p class="stat-label">Disease Types</p>
+      </div>
+      <div class="stat-card" data-aos="fade-up" data-aos-delay="200">
+        <div class="stat-icon">🎯</div>
+        <h3 class="stat-number">92%</h3>
+        <p class="stat-label">Accuracy Rate</p>
+      </div>
+      <div class="stat-card" data-aos="fade-up" data-aos-delay="300">
+        <div class="stat-icon">🌱</div>
+        <h3 class="stat-number">14</h3>
+        <p class="stat-label">Plant Species</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section class="how-it-works" aria-label="How It Works">
+    <h2 class="section-title" data-aos="fade-down">🤖 How It Works</h2>
+    <p class="section-subtitle" data-aos="fade-down" data-aos-delay="100">Simple 3-Step Process to Detect Plant Diseases</p>
+    <div class="steps-container">
+      <div class="step-card" data-aos="zoom-in" data-aos-delay="100">
+        <div class="step-number">1</div>
+        <div class="step-icon">📸</div>
+        <h3>Upload or Capture</h3>
+        <p>Take a clear photo of the plant leaf or upload an image from your gallery</p>
+      </div>
+      <div class="step-arrow" data-aos="fade-right" data-aos-delay="200">→</div>
+      <div class="step-card" data-aos="zoom-in" data-aos-delay="300">
+        <div class="step-number">2</div>
+        <div class="step-icon">🧠</div>
+        <h3>AI Analysis</h3>
+        <p>Our trained CNN model analyzes the image in just 2-3 seconds</p>
+      </div>
+      <div class="step-arrow" data-aos="fade-right" data-aos-delay="400">→</div>
+      <div class="step-card" data-aos="zoom-in" data-aos-delay="500">
+        <div class="step-number">3</div>
+        <div class="step-icon">✅</div>
+        <h3>Get Results</h3>
+        <p>Receive instant diagnosis, prevention tips, and treatment recommendations</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Supported Plants Information -->
+  <section class="supported-plants-section" aria-label="Supported Plant Types">
+    <h2 class="section-title" data-aos="fade-down">🌿 Supported Plant Types</h2>
+    <p class="section-subtitle" data-aos="fade-down" data-aos-delay="100">Our AI can detect diseases in these 14 plant species with high accuracy</p>
+    <div class="plants-grid">
+      <div class="plant-item" data-aos="flip-left" data-aos-delay="50">
+        <div class="plant-emoji">🍎</div>
+        <span>Apple</span>
+      </div>
+      <div class="plant-item" data-aos="flip-left" data-aos-delay="100">
+        <div class="plant-emoji">🫐</div>
+        <span>Blueberry</span>
+      </div>
+      <div class="plant-item" data-aos="flip-left" data-aos-delay="150">
+        <div class="plant-emoji">🍒</div>
+        <span>Cherry</span>
+      </div>
+      <div class="plant-item" data-aos="flip-left" data-aos-delay="200">
+        <div class="plant-emoji">🌽</div>
+        <span>Corn</span>
+      </div>
+      <div class="plant-item" data-aos="flip-left" data-aos-delay="250">
+        <div class="plant-emoji">🍇</div>
+        <span>Grape</span>
+      </div>
+      <div class="plant-item" data-aos="flip-left" data-aos-delay="300">
+        <div class="plant-emoji">🍊</div>
+        <span>Orange</span>
+      </div>
+      <div class="plant-item" data-aos="flip-left" data-aos-delay="350">
+        <div class="plant-emoji">🍑</div>
+        <span>Peach</span>
+      </div>
+      <div class="plant-item" data-aos="flip-left" data-aos-delay="400">
+        <div class="plant-emoji">🫑</div>
+        <span>Bell Pepper</span>
+      </div>
+      <div class="plant-item" data-aos="flip-left" data-aos-delay="450">
+        <div class="plant-emoji">🥔</div>
+        <span>Potato</span>
+      </div>
+      <div class="plant-item" data-aos="flip-left" data-aos-delay="500">
+        <div class="plant-emoji">🍇</div>
+        <span>Raspberry</span>
+      </div>
+      <div class="plant-item" data-aos="flip-left" data-aos-delay="550">
+        <div class="plant-emoji">🫛</div>
+        <span>Soybean</span>
+      </div>
+      <div class="plant-item" data-aos="flip-left" data-aos-delay="600">
+        <div class="plant-emoji">🎃</div>
+        <span>Squash</span>
+      </div>
+      <div class="plant-item" data-aos="flip-left" data-aos-delay="650">
+        <div class="plant-emoji">🍓</div>
+        <span>Strawberry</span>
+      </div>
+      <div class="plant-item" data-aos="flip-left" data-aos-delay="700">
+        <div class="plant-emoji">🍅</div>
+        <span>Tomato</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="faq-section" aria-label="Frequently Asked Questions">
+    <h2 class="section-title" data-aos="fade-down">❓ Frequently Asked Questions</h2>
+    <div class="faq-container">
+      <div class="faq-item" data-aos="fade-up">
+        <div class="faq-question">
+          <span class="faq-icon">📷</span>
+          <h3>What image quality is needed?</h3>
+          <span class="faq-toggle">+</span>
+        </div>
+        <div class="faq-answer">
+          <p>For best results, ensure: (1) Good lighting without harsh shadows, (2) Leaf occupies 70% of the frame, (3) Clear focus on disease symptoms, (4) Resolution of at least 800x800 pixels. Both JPEG and PNG formats are supported.</p>
+        </div>
+      </div>
+      <div class="faq-item" data-aos="fade-up" data-aos-delay="100">
+        <div class="faq-question">
+          <span class="faq-icon">🎯</span>
+          <h3>How accurate is the AI?</h3>
+          <span class="faq-toggle">+</span>
+        </div>
+        <div class="faq-answer">
+          <p>Our model achieves ~92% accuracy on validation data. However, results depend on image quality and disease visibility. For critical crop decisions, please consult agricultural experts.</p>
+        </div>
+      </div>
+      <div class="faq-item" data-aos="fade-up" data-aos-delay="200">
+        <div class="faq-question">
+          <span class="faq-icon">🌱</span>
+          <h3>Can I use this for indoor plants?</h3>
+          <span class="faq-toggle">+</span>
+        </div>
+        <div class="faq-answer">
+          <p>This model is specifically trained on outdoor crop diseases for the 14 supported plant species. It may not work accurately for ornamental or indoor houseplants.</p>
+        </div>
+      </div>
+      <div class="faq-item" data-aos="fade-up" data-aos-delay="300">
+        <div class="faq-question">
+          <span class="faq-icon">❌</span>
+          <h3>What if my plant isn't listed?</h3>
+          <span class="faq-toggle">+</span>
+        </div>
+        <div class="faq-answer">
+          <p>Currently, we only support the 14 plant species shown above. If you upload an unsupported plant, the system will show an error message with the list of supported plants.</p>
+        </div>
+      </div>
+      <div class="faq-item" data-aos="fade-up" data-aos-delay="400">
+        <div class="faq-question">
+          <span class="faq-icon">⏱️</span>
+          <h3>How long does analysis take?</h3>
+          <span class="faq-toggle">+</span>
+        </div>
+        <div class="faq-answer">
+          <p>Image analysis typically takes 2-5 seconds depending on your internet speed and image size. The AI model runs on our servers to ensure fast and accurate predictions.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Default Cards -->
+  <section class="carousel-container" aria-label="Featured Plant Cards" role="region">
+    <div class="plant-card" tabindex="0" role="article" aria-label="Apple Plant Card">
+      <div class="plant-card-inner">
+        <div class="plant-card-front">
+          <img src="https://post.healthline.com/wp-content/uploads/2020/09/Do_Apples_Affect_Diabetes_and_Blood_Sugar_Levels-732x549-thumbnail-1-732x549.jpg" alt="Apple leaves showing potential disease symptoms">
+          <div class="plant-info"><p>Apple</p></div>
+        </div>
+        <div class="plant-card-back">Apple Leaf Diseases: Apple Scab, Fire Blight</div>
+      </div>
+    </div>
+    <div class="plant-card" tabindex="0" role="article" aria-label="Blueberry Plant Card">
+      <div class="plant-card-inner">
+        <div class="plant-card-front">
+          <img src="https://www.supermarketperimeter.com/ext/resources/0430-blueberries.png?t=1588260305&width=1080" alt="Blueberry leaves showing potential disease symptoms">
+          <div class="plant-info"><p>Blueberry</p></div>
+        </div>
+        <div class="plant-card-back">Blueberry Leaf Diseases: Mummy Berry, Powdery Mildew</div>
+      </div>
+    </div>
+    <div class="plant-card" tabindex="0" role="article" aria-label="Cherry Plant Card">
+      <div class="plant-card-inner">
+        <div class="plant-card-front">
+          <img src="https://img.webmd.com/dtmcms/live/webmd/consumer_assets/site_images/article_thumbnails/slideshows/health_benefits_of_cherries_slideshow/1800x1200_health_benefits_of_cherries_slideshow.jpg" alt="Cherry leaves showing potential disease symptoms">
+          <div class="plant-info"><p>Cherry</p></div>
+        </div>
+        <div class="plant-card-back">Cherry Leaf Diseases: Brown Rot, Leaf Spot</div>
+      </div>
+    </div>
+    <div class="plant-card" tabindex="0" role="article" aria-label="Grape Plant Card">
+      <div class="plant-card-inner">
+        <div class="plant-card-front">
+          <img src="https://i.ndtvimg.com/i/2015-09/grapes_625x350_61443376353.jpg" alt="Grape leaves showing potential disease symptoms">
+          <div class="plant-info"><p>Grape</p></div>
+        </div>
+        <div class="plant-card-back">Grape Diseases: Powdery Mildew, Anthracnose</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Hidden Cards -->
+  <section class="carousel-container hidden-cards" id="extraCards" aria-label="Additional Plant Cards" role="region">
+    <div class="plant-card" tabindex="0" role="article" aria-label="Peach Plant Card">
+      <div class="plant-card-inner">
+        <div class="plant-card-front">
+          <img src="https://img.webmd.com/dtmcms/live/webmd/consumer_assets/site_images/articles/health_tools/the_health_benefits_of_peaches_slideshow/thinkstock_rf_peaches.jpg" alt="Peach leaves showing potential disease symptoms">
+          <div class="plant-info"><p>Peach</p></div>
+        </div>
+        <div class="plant-card-back">Peach Diseases: Leaf Curl, Brown Rot</div>
+      </div>
+    </div>
+    <div class="plant-card" tabindex="0" role="article" aria-label="Potato Plant Card">
+      <div class="plant-card-inner">
+        <div class="plant-card-front">
+          <img src="https://m.economictimes.com/thumb/height-450,width-600,imgsize-111140,msid-72862126/potato-getty.jpg" alt="Potato leaves showing potential disease symptoms">
+          <div class="plant-info"><p>Potato</p></div>
+        </div>
+        <div class="plant-card-back">Potato Leaf Diseases: Late Blight, Blackleg</div>
+      </div>
+    </div>
+    <div class="plant-card" tabindex="0" role="article" aria-label="Raspberry Plant Card">
+      <div class="plant-card-inner">
+        <div class="plant-card-front">
+          <img src="https://i0.wp.com/cdn-prod.medicalnewstoday.com/content/images/articles/326/326272/raspberries-with-ketones-in-a-bowl.jpg" alt="Raspberry leaves showing potential disease symptoms">
+          <div class="plant-info"><p>Raspberry</p></div>
+        </div>
+        <div class="plant-card-back">Raspberry Diseases: Spur Blight, Cane Botrytis</div>
+      </div>
+    </div>
+    <div class="plant-card" tabindex="0" role="article" aria-label="Soybean Plant Card">
+      <div class="plant-card-inner">
+        <div class="plant-card-front">
+          <img src="https://m.economictimes.com/thumb/msid-66988154,width-1200,height-900,resizemode-4,imgsize-211276/soyabean-agencies.jpg" alt="Soybean leaves showing potential disease symptoms">
+          <div class="plant-info"><p>Soybean</p></div>
+        </div>
+        <div class="plant-card-back">Soybean Diseases: Rust, Downy Mildew</div>
+      </div>
+    </div>
+  </section>
+  <section class="carousel-container hidden-cards" id="extraCards2" aria-label="More Plant Cards" role="region">
+    <div class="plant-card" tabindex="0" role="article" aria-label="Squash Plant Card">
+      <div class="plant-card-inner">
+        <div class="plant-card-front">
+          <img src="https://post.healthline.com/wp-content/uploads/2020/08/squash-fruit-or-vegetable-732x549-thumbnail-732x549.jpg" alt="Squash leaves showing potential disease symptoms">
+          <div class="plant-info"><p>Squash</p></div>
+        </div>
+        <div class="plant-card-back">Squash Diseases: Powdery Mildew, Mosaic Virus</div>
+      </div>
+    </div>
+    <div class="plant-card" tabindex="0" role="article" aria-label="Strawberry Plant Card">
+      <div class="plant-card-inner">
+        <div class="plant-card-front">
+          <img src="https://images.indianexpress.com/2020/02/strawberry-1200.jpg" alt="Strawberry leaves showing potential disease symptoms">
+          <div class="plant-info"><p>Strawberry</p></div>
+        </div>
+        <div class="plant-card-back">Strawberry Diseases: Leaf Spot, Anthracnose</div>
+      </div>
+    </div>
+    <div class="plant-card" tabindex="0" role="article" aria-label="Tomato Plant Card">
+      <div class="plant-card-inner">
+        <div class="plant-card-front">
+          <img src="https://images-prod.healthline.com/hlcmsresource/images/AN_images/tomatoes-1296x728-feature.jpg" alt="Tomato leaves showing potential disease symptoms">
+          <div class="plant-info"><p>Tomato</p></div>
+        </div>
+        <div class="plant-card-back">Tomato Leaf Diseases: Early Blight, Leaf Mold, Mosaic Virus</div>
+      </div>
+    </div>
+    <div class="plant-card" tabindex="0" role="article" aria-label="Corn Plant Card">
+      <div class="plant-card-inner">
+        <div class="plant-card-front">
+          <img src="https://i.ytimg.com/vi/YpG_B2s-06s/maxresdefault.jpg" alt="Corn leaves showing potential disease symptoms">
+      <div class="plant-info"><p>Tomato</p></div>
+        </div>
+        <div class="plant-card-back">Corn Diseases: Common Rust, Gray Leaf Spot</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="see-more-container">
+    <button class="see-more-btn" id="seeMoreBtn" aria-expanded="false" aria-controls="extraCards extraCards2">🌱 See More Plants</button>
+  </div>
+
+<script>
+  // See More Plants Button Functionality with Debug Logging
+  console.log('=== PLANT CARDS SCRIPT LOADING ===');
+  
+  const seeMoreBtn = document.getElementById('seeMoreBtn');
+  const extraCards = document.getElementById('extraCards');
+  const extraCards2 = document.getElementById('extraCards2');
+  let expanded = false;
+
+  if (seeMoreBtn && extraCards && extraCards2) {
+    console.log('✓ All elements found, adding event listener');
+    
+    seeMoreBtn.addEventListener('click', () => {
+      console.log('\n=== BUTTON CLICKED ===');
+      console.log('Current expanded state:', expanded);
+      
+      expanded = !expanded;
+      console.log('New expanded state:', expanded);
+      
+      if (expanded) {
+        console.log('Showing cards...');
+        
+        // Show hidden cards - use cssText for absolute control
+        extraCards.style.cssText = `
+          display: grid !important;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+          justify-items: center !important;
+          gap: 2rem !important;
+          max-width: 1300px !important;
+          margin: 5rem auto !important;
+          padding: 0 1rem !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+          height: auto !important;
+        `;
+        
+        extraCards2.style.cssText = `
+          display: grid !important;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+          justify-items: center !important;
+          gap: 2rem !important;
+          max-width: 1300px !important;
+          margin: 5rem auto !important;
+          padding: 0 1rem !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+          height: auto !important;
+        `;
+        
+        console.log('ExtraCards display:', window.getComputedStyle(extraCards).display);
+        console.log('ExtraCards2 display:', window.getComputedStyle(extraCards2).display);
+        
+        seeMoreBtn.textContent = '🌿 See Less';
+        seeMoreBtn.setAttribute('aria-expanded', 'true');
+        
+        // Smooth scroll to show new cards
+        setTimeout(() => {
+          extraCards.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+        
+        console.log('✓ Cards should now be visible');
+      } else {
+        console.log('Hiding cards...');
+        
+        // Hide cards
+        extraCards.style.cssText = 'display: none !important;';
+        extraCards2.style.cssText = 'display: none !important;';
+        
+        seeMoreBtn.textContent = '🌱 See More Plants';
+        seeMoreBtn.setAttribute('aria-expanded', 'false');
+        
+        console.log('✓ Cards hidden');
+      }
+    });
+  } else {
+    console.error('✗ Missing elements!');
+    console.error('Button:', seeMoreBtn);
+    console.error('ExtraCards:', extraCards);
+    console.error('ExtraCards2:', extraCards2);
+  }
+
+  // Keyboard navigation for cards
+  document.querySelectorAll('.plant-card').forEach(card => {
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        card.click(); // Trigger any click handler if needed
+      }
+    });
+  });
+
+  // Lazy loading for images
+  if ('IntersectionObserver' in window) {
+    const imageObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          img.src = img.dataset.src || img.src;
+          img.classList.remove('lazy');
+          observer.unobserve(img);
+        }
+      });
+    });
+
+    document.querySelectorAll('img[loading="lazy"]').forEach(img => {
+      imageObserver.observe(img);
+    });
+  }
+
+  // FAQ Accordion Toggle
+  document.querySelectorAll('.faq-question').forEach(question => {
+    question.addEventListener('click', () => {
+      const faqItem = question.parentElement;
+      const isActive = faqItem.classList.contains('active');
+      
+      // Close all FAQs
+      document.querySelectorAll('.faq-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      
+      // Open clicked FAQ if it wasn't active
+      if (!isActive) {
+        faqItem.classList.add('active');
+      }
+    });
+  });
+
+  // Initialize AOS (Animate On Scroll)
+  if (typeof AOS !== 'undefined') {
+    AOS.init({
+      duration: 800,
+      once: true,
+      offset: 100
+    });
+  }
+
+  // ============ ADVANCED GLASSMORPHISM: Dynamic Background Blur ============
+  
+  // Progressive blur effect on cards based on scroll position
+  const glassCards = document.querySelectorAll('.stat-card, .step-card, .plant-card-front, .plant-card-back');
+  
+  function updateGlassmorphismOnScroll() {
+    const scrollPosition = window.pageYOffset;
+    const windowHeight = window.innerHeight;
+    
+    glassCards.forEach(card => {
+      const cardRect = card.getBoundingClientRect();
+      const cardCenter = cardRect.top + cardRect.height / 2;
+      const distanceFromCenter = Math.abs(windowHeight / 2 - cardCenter);
+      const maxDistance = windowHeight;
+      
+      // Calculate blur intensity (30px to 50px based on distance from viewport center)
+      const blurIntensity = 30 + (distanceFromCenter / maxDistance) * 20;
+      
+      // Calculate saturation (150% to 200% based on scroll)
+      const saturation = 150 + (scrollPosition / 10) % 50;
+      
+      // Update backdrop filter dynamically
+      if (card.classList.contains('stat-card') || card.classList.contains('step-card')) {
+        card.style.backdropFilter = `blur(${Math.min(blurIntensity, 50)}px) saturate(${saturation}%)`;
+        card.style.webkitBackdropFilter = `blur(${Math.min(blurIntensity, 50)}px) saturate(${saturation}%)`;
+      }
+    });
+  }
+  
+  // Throttle scroll events for performance
+  let scrollTimeout;
+  window.addEventListener('scroll', () => {
+    if (scrollTimeout) {
+      window.cancelAnimationFrame(scrollTimeout);
+    }
+    scrollTimeout = window.requestAnimationFrame(() => {
+      updateGlassmorphismOnScroll();
+    });
+  });
+  
+  // Glass morphing ripple effect on card hover
+  document.querySelectorAll('.stat-card, .step-card').forEach(card => {
+    card.addEventListener('mouseenter', function(e) {
+      // Create ripple element
+      const ripple = document.createElement('div');
+      ripple.style.cssText = `
+        position: absolute;
+        background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(168,230,207,0.3) 50%, transparent 70%);
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        pointer-events: none;
+        transform: scale(0);
+        animation: ripple 0.6s ease-out;
+      `;
+      card.style.position = 'relative';
+      card.appendChild(ripple);
+      
+      setTimeout(() => ripple.remove(), 600);
+    });
+  });
+
+  // Initialize AOS (Animate On Scroll)
+  if (typeof AOS !== 'undefined') {
+    AOS.init({
+      duration: 800,
+      once: true,
+      offset: 100
+    });
+  }
+</script>
+{% endblock body %}
