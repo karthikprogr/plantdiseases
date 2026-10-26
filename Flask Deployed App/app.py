@@ -5,7 +5,7 @@ import smtplib
 from datetime import datetime
 from email.message import EmailMessage
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask import Flask, redirect, render_template, request, url_for, session, jsonify, flash, send_from_directory
+from flask import Flask, redirect, render_template, request, url_for, session, jsonify, flash
 from werkzeug.utils import secure_filename
 from PIL import Image
 import torchvision.transforms.functional as TF
@@ -16,20 +16,9 @@ import pandas as pd
 from dotenv import load_dotenv
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadTimeSignature
 from openai import OpenAI
-from flask_cors import CORS
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
-import firebase_service
 
 # -------------------- Load Environment --------------------
 load_dotenv()
-
-# -------------------- Initialize Firebase --------------------
-try:
-    firebase_service.initialize_firebase()
-    print("✅ Firebase initialized successfully")
-except Exception as e:
-    print(f"❌ Firebase initialization failed: {e}")
-    print("⚠️  App will run but database operations will fail")
 
 # -------------------- Config --------------------
 UPLOAD_FOLDER = os.path.join('static', 'uploads')
@@ -144,31 +133,14 @@ app.secret_key = os.environ.get("FLASK_SECRET", "change_this_secret_in_prod")
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# -------------------- CORS and JWT Configuration --------------------
-# Get CORS origins from environment variable
-cors_origins = os.environ.get('CORS_ORIGINS', 'http://localhost:3000,http://localhost:5000').split(',')
-CORS(app, resources={
-    r"/api/*": {"origins": cors_origins},
-    r"/*": {"origins": cors_origins}
-}, supports_credentials=True)
-
-app.config['JWT_SECRET_KEY'] = os.environ.get("JWT_SECRET_KEY", "jwt-secret-key-change-in-prod")
-jwt = JWTManager(app)
-
-# -------------------- Database Configuration (LEGACY - Keeping for backward compatibility) --------------------
-# Using Firebase Firestore as primary database
-# SQLAlchemy kept for existing model references only
+# -------------------- Database Configuration --------------------
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///plant_disease.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_ECHO'] = False
+app.config['SQLALCHEMY_ECHO'] = False  # Set to True for SQL query logging
 
-try:
-    from models import db, init_db, User, Prediction, Feedback
-    init_db(app)
-    print("✅ SQLAlchemy initialized (legacy support)")
-except Exception as e:
-    print(f"⚠️  SQLAlchemy initialization skipped: {e}")
-    print("   Using Firebase Firestore as primary database")
+# Import and initialize database
+from models import db, init_db, User, Prediction, Feedback, migrate_csv_to_db, get_user_stats
+init_db(app)
 
 # -------------------- Google OAuth Configuration --------------------
 from authlib.integrations.flask_client import OAuth
@@ -303,103 +275,7 @@ def chat():
         return jsonify({'error': str(e)}), 500
 
 
-# -------------------- API Routes for React Frontend --------------------
-
-# API: Login endpoint
-@app.route('/api/auth/login', methods=['POST'])
-def api_login():
-    data = request.get_json()
-    email = data.get('username', '').strip() or data.get('email', '').strip()
-    password = data.get('password', '').strip()
-    
-    if not email or not password:
-        return jsonify({'error': 'Email and password required'}), 400
-    
-    try:
-        # Get user from Firebase
-        user = firebase_service.get_user_by_email(email)
-        
-        if not user:
-            return jsonify({'error': 'Invalid email or password'}), 401
-        
-        # Note: Firebase Admin SDK doesn't directly verify passwords
-        # For production, use Firebase Auth REST API or client-side auth
-        # For now, accepting if user exists (implement proper auth in production)
-        
-        # Update last login
-        firebase_service.update_user_last_login(user['user_id'])
-        
-        # Create JWT token
-        access_token = create_access_token(identity=user['user_id'])
-        
-        return jsonify({
-            'token': access_token,
-            'email': email,
-            'user_id': user['user_id'],
-            'full_name': user.get('full_name', ''),
-            'message': 'Login successful'
-        }), 200
-        
-    except Exception as e:
-        print(f"Login error: {e}")
-        return jsonify({'error': 'Login failed. Please try again.'}), 500
-
-
-# API: Signup endpoint
-@app.route('/api/auth/signup', methods=['POST'])
-def api_signup():
-    data = request.get_json()
-    email = data.get('username', '').strip() or data.get('email', '').strip()
-    password = data.get('password', '').strip()
-    full_name = data.get('full_name', '').strip() or email.split('@')[0]
-    phone = data.get('phone', '').strip()
-    
-    if not email or not password:
-        return jsonify({'error': 'Please provide both an email and password.'}), 400
-    
-    # Password strength validation
-    if len(password) < 6:
-        return jsonify({'error': 'Password must be at least 6 characters long.'}), 400
-    
-    # Email validation
-    if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
-        return jsonify({'error': 'Invalid email address format. Please enter a valid email.'}), 400
-    
-    try:
-        # Check if user exists in Firebase
-        existing_user = firebase_service.get_user_by_email(email)
-        if existing_user:
-            return jsonify({'error': 'An account with this email already exists.'}), 409
-        
-        # Create new user in Firebase
-        result = firebase_service.create_user(
-            email=email,
-            password=password,
-            full_name=full_name,
-            phone=phone
-        )
-        
-        if result['success']:
-            return jsonify({
-                'message': 'Account created successfully! Please login.',
-                'user_id': result['user_id']
-            }), 201
-        else:
-            return jsonify({'error': result['message']}), 400
-            
-    except Exception as e:
-        print(f"Signup error: {e}")
-        return jsonify({'error': 'Signup failed. Please try again.'}), 500
-
-
-# API: Google OAuth login (redirect to Google)
-@app.route('/api/auth/google-login')
-def api_google_login():
-    redirect_uri = url_for('google_authorize', _external=True)
-    return google.authorize_redirect(redirect_uri)
-
-
-# -------------------- Original Routes (Keep for backward compatibility) --------------------
+# -------------------- Routes --------------------
 @app.route('/')
 def login_default():
     if 'username' in session:
@@ -596,65 +472,116 @@ def prediction_history():
         return redirect(url_for('login'))
     
     try:
-        # Get user email from session
-        user_email = session.get('username')
+        # DEBUG: Print session information
+        print("\n" + "="*70)
+        print("🔍 HISTORY PAGE DEBUG")
+        print("="*70)
+        user_id = session.get('user_id')
+        print(f"📋 Session user_id: {user_id}")
+        print(f"📋 Session user_id type: {type(user_id)}")
+        print(f"📋 Full session data: {dict(session)}")
         
-        if not user_email:
-            flash('Session expired. Please login again.', 'warning')
-            return redirect(url_for('login'))
+        # DEBUG: Test direct query
+        test_query = Prediction.query.filter_by(user_id=user_id).all()
+        print(f"🔎 Direct query result: Found {len(test_query)} predictions")
         
-        # Get predictions from Firebase
-        predictions = firebase_service.get_user_predictions(user_email, limit=100)
+        # DEBUG: Test with type conversion
+        if isinstance(user_id, str):
+            print(f"⚠️  user_id is string! Converting to int...")
+            user_id_int = int(user_id)
+            test_query2 = Prediction.query.filter_by(user_id=user_id_int).all()
+            print(f"🔎 Query with int conversion: Found {len(test_query2)} predictions")
         
-        print(f"📊 Retrieved {len(predictions)} predictions from Firebase for {user_email}")
+        # DEBUG: Check if user exists
+        user = User.query.get(user_id)
+        print(f"👤 User object: {user}")
+        if user:
+            print(f"👤 User.username: {user.username}")
+            print(f"👤 User.predictions.count(): {user.predictions.count()}")
         
-        # Format predictions for template
-        formatted_predictions = []
-        for pred in predictions:
-            formatted_predictions.append({
-                'id': pred.get('prediction_id', ''),
-                'disease_name': pred.get('prediction', 'Unknown'),
-                'confidence': pred.get('confidence', 0) * 100,
-                'image_path': f"uploads/{pred.get('image_name', '')}",
-                'timestamp': pred.get('timestamp', ''),
-                'created_at': pred.get('created_at', ''),
-                'supplement': pred.get('supplement', ''),
-                'description': pred.get('description', '')
-            })
+        print("="*70 + "\n")
         
-        # Calculate stats
-        stats = {
-            'total_predictions': len(formatted_predictions),
-            'healthy_plants': sum(1 for p in formatted_predictions if 'healthy' in p['disease_name'].lower()),
-            'diseased_plants': sum(1 for p in formatted_predictions if 'healthy' not in p['disease_name'].lower()),
-            'member_since': 'Recently',
-            'last_login': 'Today'
-        }
+        # Get user statistics (with safe defaults)
+        try:
+            stats = get_user_stats(session['user_id'])
+            print(f"📊 Stats from get_user_stats: {stats}")
+        except Exception as stats_error:
+            print(f"❌ Stats error: {stats_error}")
+            import traceback
+            traceback.print_exc()
+            # Provide default stats if there's an error
+            stats = {
+                'total_predictions': 0,
+                'healthy_plants': 0,
+                'diseased_plants': 0,
+                'member_since': 'Unknown',
+                'last_login': 'Never'
+            }
         
-        return render_template('history.html', 
-                             predictions=formatted_predictions, 
+        # Get recent predictions with pagination and filtering
+        page = request.args.get('page', 1, type=int)
+        per_page = 20
+        
+        # Start with base query
+        query = Prediction.query.filter_by(user_id=session['user_id'])
+        
+        # Apply search filter
+        search_term = request.args.get('search', '').strip()
+        if search_term:
+            query = query.filter(Prediction.disease_name.ilike(f'%{search_term}%'))
+            print(f"🔍 Applying search filter: {search_term}")
+        
+        # Apply health filter
+        health_filter = request.args.get('health', '')
+        if health_filter == 'healthy':
+            # Filter for healthy plant classes (based on your model's healthy class indices)
+            healthy_classes = [3, 5, 7, 11, 15, 18, 20, 23, 24, 25, 28, 38]
+            query = query.filter(Prediction.predicted_class.in_(healthy_classes))
+            print(f"🌱 Applying health filter: healthy only")
+        elif health_filter == 'diseased':
+            # Filter for diseased plant classes
+            healthy_classes = [3, 5, 7, 11, 15, 18, 20, 23, 24, 25, 28, 38]
+            query = query.filter(~Prediction.predicted_class.in_(healthy_classes))
+            print(f"🦠 Applying health filter: diseased only")
+        
+        # Apply sorting
+        sort_by = request.args.get('sort', 'newest')
+        if sort_by == 'oldest':
+            query = query.order_by(Prediction.timestamp.asc())
+            print(f"📅 Sorting by: oldest first")
+        elif sort_by == 'confidence':
+            query = query.order_by(Prediction.confidence.desc())
+            print(f"📊 Sorting by: highest confidence")
+        else:  # newest (default)
+            query = query.order_by(Prediction.timestamp.desc())
+            print(f"📅 Sorting by: newest first")
+        
+        # Execute query with pagination
+        predictions = query.paginate(page=page, per_page=per_page, error_out=False)
+        
+        print(f"✅ History page: Found {predictions.total} predictions for user {session['user_id']}")
+        if search_term or health_filter or sort_by:
+            print(f"🎯 Filters active - Showing {len(predictions.items)} results on page {page}")
+        
+        return render_template('history.html',
+                             username=session.get('username', 'User'),
+                             predictions=predictions.items,
                              stats=stats,
-                             username=session.get('username', 'User'))
-        
+                             pagination=predictions,
+                             total=predictions.total)
+    
     except Exception as e:
-        print(f"❌ Error loading history: {e}")
+        print(f"❌ History page error: {str(e)}")
         import traceback
         traceback.print_exc()
-        flash('Error loading prediction history', 'error')
-        
-        # Return with default empty stats
-        default_stats = {
-            'total_predictions': 0,
-            'healthy_plants': 0,
-            'diseased_plants': 0,
-            'member_since': 'Unknown',
-            'last_login': 'Never'
-        }
-        
-        return render_template('history.html', 
-                             predictions=[], 
-                             stats=default_stats,
-                             username=session.get('username', 'User'))
+        flash(f'Error loading history: {str(e)}', 'danger')
+        # Return an empty history page instead of redirecting
+        return render_template('history.html',
+                             username=session.get('username', 'User'),
+                             predictions=[],
+                             stats={'total_predictions': 0, 'healthy_plants': 0, 'diseased_plants': 0, 'member_since': 'Unknown', 'last_login': 'Never'},
+                             pagination=None,
+                             total=0)
 
 
 @app.route('/delete-prediction/<int:prediction_id>', methods=['DELETE'])
@@ -958,62 +885,34 @@ def submit():
             return render_submit_error(f"Prediction failed: {e}")
 
         # Save prediction to database - ALWAYS SAVE REGARDLESS OF VALIDITY
-        user_email = session.get('username')  # Username is email in our system
         user_id = session.get('user_id')
-        if user_email:
+        if user_id:
             disease_name = CNN.idx_to_classes.get(pred, "Unknown")
-            print(f"💾 Saving prediction for user {user_email}: {disease_name}")
+            print(f"💾 Saving prediction for user {user_id}: {disease_name}")
             
             try:
-                # Get supplement info for this disease
-                supplement_name = ""
-                if pred < len(supplement_info):
-                    supplement_name = supplement_info.iloc[pred].get('supplement name', '')
-                
-                # Get description for this disease
-                description = ""
-                if pred < len(disease_info):
-                    description = disease_info.iloc[pred].get('description', '')
-                
-                # Save to Firebase Firestore
-                prediction_id = firebase_service.save_prediction(
-                    user_email=user_email,
-                    image_name=filename,
-                    prediction=disease_name,
+                new_prediction = Prediction(
+                    user_id=user_id,
+                    image_path=f'uploads/{filename}',
+                    original_filename=original_filename,
+                    predicted_class=pred,
+                    disease_name=disease_name,
                     confidence=confidence,
-                    supplement=supplement_name,
-                    description=description
+                    is_valid_plant=is_valid_plant,
+                    ip_address=request.remote_addr,
+                    user_agent=request.headers.get('User-Agent', '')[:300]
                 )
+                db.session.add(new_prediction)
+                db.session.commit()
                 
-                if prediction_id:
-                    session['last_prediction_id'] = prediction_id
-                    print(f"✅ Prediction saved to Firestore with ID: {prediction_id}")
-                else:
-                    print("⚠️ Failed to save prediction to Firestore")
-                    
-                # Also save to SQLAlchemy for backward compatibility (optional)
-                try:
-                    if user_id:
-                        new_prediction = Prediction(
-                            user_id=user_id,
-                            image_path=f'uploads/{filename}',
-                            original_filename=original_filename,
-                            predicted_class=pred,
-                            disease_name=disease_name,
-                            confidence=confidence,
-                            is_valid_plant=is_valid_plant,
-                            ip_address=request.remote_addr,
-                            user_agent=request.headers.get('User-Agent', '')[:300]
-                        )
-                        db.session.add(new_prediction)
-                        db.session.commit()
-                except Exception as sql_error:
-                    print(f"⚠️ SQLAlchemy save skipped: {sql_error}")
-                    
+                # Store prediction ID in session for feedback
+                session['last_prediction_id'] = new_prediction.id
+                print(f"✅ Prediction saved with ID: {new_prediction.id}")
             except Exception as db_error:
                 print(f"❌ Database save error: {db_error}")
+                db.session.rollback()
         else:
-            print(f"⚠️ No user email in session! Session keys: {list(session.keys())}")
+            print(f"⚠️ No user_id in session! Session keys: {list(session.keys())}")
 
         # Check if the image is a valid plant from our dataset
         if not is_valid_plant:
@@ -1091,29 +990,5 @@ def submit():
 
 
 # -------------------- MAIN --------------------
-
-# Health check endpoint for deployment monitoring
-@app.route('/health')
-def health_check():
-    """Health check endpoint for monitoring"""
-    status = {
-        'status': 'healthy',
-        'timestamp': datetime.now().isoformat(),
-        'firebase': 'unknown',
-        'model': 'unknown'
-    }
-    
-    # Check Firebase connection
-    try:
-        firebase_service.test_firebase_connection()
-        status['firebase'] = 'connected'
-    except:
-        status['firebase'] = 'disconnected'
-    
-    # Check model
-    status['model'] = 'loaded' if model is not None else 'not_loaded'
-    
-    return jsonify(status), 200
-
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)

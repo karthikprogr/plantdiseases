@@ -1,4 +1,4 @@
-"""
+﻿"""
 Google OAuth Configuration
 Edit this file with your Google OAuth credentials
 """
@@ -18,16 +18,16 @@ Edit this file with your Google OAuth credentials
 # ============================================
 
 # Paste your Client ID here (between the quotes)
-GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID"
+GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID_HERE.apps.googleusercontent.com"
 
 # Paste your Client Secret here (between the quotes)
-GOOGLE_CLIENT_SECRET = "YOUR_GOOGLE_CLIENT_SECRET"
+GOOGLE_CLIENT_SECRET = "YOUR_GOOGLE_CLIENT_SECRET_HERE"
 
 # ============================================
 # EXAMPLE (this is what it should look like):
 # ============================================
-# GOOGLE_CLIENT_ID = "PLACEHOLDER_CLIENT_ID.apps.googleusercontent.com"
-# GOOGLE_CLIENT_SECRET = "GOCSPX-PLACEHOLDER_SECRET"
+# GOOGLE_CLIENT_ID = "123456789012-abc123def456ghi789jkl012mno345pqr.apps.googleusercontent.com"
+# GOOGLE_CLIENT_SECRET = "GOCSPX-ABC123def456GHI789jkl"
 # ============================================
 
 # Flask secret key for sessions

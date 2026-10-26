@@ -1,13 +1,62 @@
-
-firebase-credentials.json
-**/*credentials.json
+﻿# Python
 __pycache__/
+*.py[cod]
+*.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+
+# Environment Variables (SENSITIVE!)
+.env
+*.env
+!.env.example
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Flask
+instance/
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+flask_output.log
+flask_error.log
+
+# Uploaded files
+Flask Deployed App/static/uploads/*
+!Flask Deployed App/static/uploads/.gitkeep
+
+# Model files (too large for git - use Git LFS or download separately)
 *.pt
-venv/
-.env
+*.pth
+*.h5
+*.pkl
 
-firebase-credentials.json
-**/*credentials.json
-__pycache__/
-venv/
-.env
+# CSV data files (can be large)
+predictions.csv
+users.csv
+
+# Salesforce
+.sfdx/
+
+# Research papers
+*.pdf
